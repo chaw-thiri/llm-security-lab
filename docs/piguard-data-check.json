@@ -1,0 +1,155 @@
+{
+  "trainRows": 76735,
+  "labelCounts": {
+    "0": 61069,
+    "1": 15666
+  },
+  "emptyRows": 3,
+  "exactDuplicateExcess": 2892,
+  "normalizedDuplicateExcess": 3225,
+  "conflictingGroups": 5,
+  "conflictRows": 19,
+  "cleanUniqueRows": 73504,
+  "cleanCounts": {
+    "0": 58949,
+    "1": 14555
+  },
+  "validation": {
+    "rows": 144,
+    "counts": {
+      "0": 96,
+      "1": 48
+    },
+    "sources": {
+      "WildGuard": {
+        "0": 24
+      },
+      "PINT_chat": {
+        "0": 8
+      },
+      "PINT_documents": {
+        "0": 8
+      },
+      "PINT_hard_negatives": {
+        "0": 8
+      },
+      "BIPIA_text": {
+        "1": 12
+      },
+      "BIPIA_code": {
+        "1": 12
+      },
+      "PINT_public_prompt_injection": {
+        "1": 8
+      },
+      "PINT_internal_prompt_injection": {
+        "1": 8
+      },
+      "PINT_jailbreak": {
+        "1": 8
+      },
+      "NotInject_one": {
+        "0": 16
+      },
+      "NotInject_two": {
+        "0": 16
+      },
+      "NotInject_three": {
+        "0": 16
+      }
+    },
+    "trainingOverlapRows": 3,
+    "overlapSources": {
+      "PINT_public_prompt_injection": 3
+    }
+  },
+  "sourceCounts": {
+    "prompt-injections": {
+      "0": 343,
+      "1": 203
+    },
+    "jailbreak-classification": {
+      "0": 517,
+      "1": 527
+    },
+    "safe-guard-prompt-injection": {
+      "0": 5740,
+      "1": 2496
+    },
+    "TaskTracker": {
+      "0": 11386,
+      "1": 3316
+    },
+    "BIPIA": {
+      "0": 558,
+      "1": 558
+    },
+    "Question Set": {
+      "0": 643,
+      "1": 1643
+    },
+    "over-defense": {
+      "0": 762
+    },
+    "StruQ": {
+      "1": 20
+    },
+    "InjecAgent": {
+      "1": 111
+    },
+    "LLM Augmented set": {
+      "1": 435
+    },
+    "Prompt-Injection-Mixed-Techniques": {
+      "1": 1174
+    },
+    "ChatGPT-Jailbreak-Prompts": {
+      "1": 79
+    },
+    "vigil-jailbreak-ada-002": {
+      "1": 104
+    },
+    "hackaprompt-dataset": {
+      "1": 5000
+    },
+    "Alpaca": {
+      "0": 4000
+    },
+    "chatbot_instruction_prompts": {
+      "0": 16000
+    },
+    "open-instruct": {
+      "0": 12000
+    },
+    "xtest-v2-copy": {
+      "0": 450
+    },
+    "grok-conversation-harmless": {
+      "0": 4000
+    },
+    "no_robots": {
+      "0": 1500
+    },
+    "awesome-chatgpt-prompts": {
+      "0": 170
+    },
+    "ultrachat_200k": {
+      "0": 3000
+    }
+  },
+  "provenance": {
+    "repository": "leolee99/PIGuard",
+    "trainingBlobSha": "c237dbe9b972cbd8f55e28d378e819173a59737c",
+    "validationBlobSha": "9304da40524fbc1b08b0a3c3cde98b33e7ae2cb2"
+  },
+  "method": {
+    "normalization": "Lowercase, collapse whitespace, trim. Original prompt text was not modified.",
+    "cleaning": "Count one representative per normalized group after excluding blank prompts and all groups with conflicting labels.",
+    "limitations": [
+      "No tokenization length audit",
+      "No near-duplicate or template-family analysis",
+      "No manual semantic label review",
+      "No changes to project files"
+    ]
+  }
+}
