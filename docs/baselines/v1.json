@@ -1,0 +1,413 @@
+{
+  "baseline_id": "v1",
+  "git_tag": "baseline-v1",
+  "training_code_commit": "baa4b4461c156015521d161a8d845d89792c71cc",
+  "completed_at_utc": "2026-10-28T16:50:56.679656+00:00",
+  "preserved_at_utc": "2026-10-28T23:09:42.984108+00:00",
+  "local_snapshot": "runs/baseline-v1",
+  "data_provenance": {
+    "repository": "leolee99/PIGuard",
+    "files": {
+      "train.json": {
+        "url": "https://raw.githubusercontent.com/leolee99/PIGuard/1b5751e88bf7475acbedfc8eda795ce060307c84/datasets/train.json",
+        "git_blob_sha": "c237dbe9b972cbd8f55e28d378e819173a59737c",
+        "sha256": "806ded8bd85782a53d34faffe4fd92b3f2e0b3b431c43578ce77faea6b9ed911"
+      },
+      "valid.json": {
+        "url": "https://raw.githubusercontent.com/leolee99/PIGuard/1b5751e88bf7475acbedfc8eda795ce060307c84/datasets/valid.json",
+        "git_blob_sha": "9304da40524fbc1b08b0a3c3cde98b33e7ae2cb2",
+        "sha256": "fdf0f1f83b3e4017a71867e010f8345dc6aa706ef8628fa6a77f23f0f0a6d87b"
+      }
+    },
+    "repository_revision": "1b5751e88bf7475acbedfc8eda795ce060307c84",
+    "backbone": {
+      "model_name": "distilbert/distilbert-base-uncased",
+      "revision": "12040accade4e8a0f71eabdb258fecc2e7e948be",
+      "path": "data/raw/piguard/backbone",
+      "weights_sha256": "90295ed56fc68ca98b4d7011d1966e2149226ccb4226ae71b6935a723c665a31"
+    }
+  },
+  "data_manifest_sha256": "2b59ec0caf4344e1628d38ccd181c0a42251b358538ce0426e97b73719e1ad87",
+  "split_counts": {
+    "train": 58799,
+    "validation": 7351,
+    "test": 7351
+  },
+  "experiment_record": "docs/experiment-results.json",
+  "seed": 42,
+  "models": {
+    "full": {
+      "checkpoint": "models/full/best",
+      "weights_sha256": "e64d9b21a4a81f0c00cc26ed0395480bdd2e912053395e8459f53a181097ac99",
+      "threshold": 0.002023694571107626,
+      "selected_update": 8500
+    },
+    "frozen": {
+      "checkpoint": "models/frozen/best",
+      "weights_sha256": "1489c5dbb31e450a710a4f90b3ad0f7ef6586aba7f439bad5a70d2cd9745e31e",
+      "threshold": 0.4281206727027893,
+      "selected_update": 10500
+    },
+    "mean": {
+      "checkpoint": "models/mean/best",
+      "weights_sha256": "654a10a3ca6191ae45711a0a440f8c0acab0363bddb1b8c5ec80a780576d5fb0",
+      "threshold": 0.001736168866045773,
+      "selected_update": 11025
+    }
+  },
+  "artifact_count": 69,
+  "artifact_bytes": 2737693653,
+  "artifacts": [
+    {
+      "path": "configs/frozen.json",
+      "bytes": 422,
+      "sha256": "fafc8077f419f1e206c9cc51f98f78357df9e294f45147225a6414636154a0de"
+    },
+    {
+      "path": "configs/full.json",
+      "bytes": 423,
+      "sha256": "d517400670e481d4307cfc17b08e2b9984cb77fdf503caf41b4d76c776450f29"
+    },
+    {
+      "path": "configs/mean.json",
+      "bytes": 424,
+      "sha256": "b8ed0f00ec2467e6eff9e4853d0bcf266be348825573d014ff5bd2f0ffd3a195"
+    },
+    {
+      "path": "configs/smoke.json",
+      "bytes": 422,
+      "sha256": "779f09728d09423ed077108b88d3712d2ba8c26ae87e0a4a6601255ccd1fa8e9"
+    },
+    {
+      "path": "histories/frozen.jsonl",
+      "bytes": 14588,
+      "sha256": "ff21fa2a3555683c06975921dddd074ba35734d4820192dc6bb47c6553685e25"
+    },
+    {
+      "path": "histories/full.jsonl",
+      "bytes": 14648,
+      "sha256": "8121f47785c69796d332cb6a56903926b59f04d0d69f9362df1ae01ee3e41743"
+    },
+    {
+      "path": "histories/mean.jsonl",
+      "bytes": 14662,
+      "sha256": "04fec7cb7945c36fc17d86b2b46f11f72da55aa42a4acd3beac2dc89ef452f27"
+    },
+    {
+      "path": "metadata/data-provenance.json",
+      "bytes": 1000,
+      "sha256": "0f0ef88cb21ca8ae31c1e150875da283804189dc619c4132469982c5e701860b"
+    },
+    {
+      "path": "metadata/frozen-run.json",
+      "bytes": 1115,
+      "sha256": "cc418f52a33c4320a6119922290c69fb15e9993d1e00688b7b8618fefe184d81"
+    },
+    {
+      "path": "metadata/frozen-status.json",
+      "bytes": 153,
+      "sha256": "72270a0658f445fc5d614bf44171973298cf64feacee0bac3b3dd8006493abb0"
+    },
+    {
+      "path": "metadata/full-run.json",
+      "bytes": 1116,
+      "sha256": "1abd785aa4cbaea239c327a3b136128701a4bf58089cc4973891b30e58efe0e7"
+    },
+    {
+      "path": "metadata/full-status.json",
+      "bytes": 154,
+      "sha256": "fbe913a8de86a83b779fa88800910903f4124743d48668ae37ee9a29cf906896"
+    },
+    {
+      "path": "metadata/mean-run.json",
+      "bytes": 1117,
+      "sha256": "8bc16c76cd22e86edfeca4db9aadd9720e70713fc26819ac3619a8cf134b651d"
+    },
+    {
+      "path": "metadata/mean-status.json",
+      "bytes": 154,
+      "sha256": "b4e16df2aa0be71f1363f21c2590beb639c64cf2610e8e96ccceb95e8b2c3dcd"
+    },
+    {
+      "path": "metadata/runtime-environment.json",
+      "bytes": 359,
+      "sha256": "48bae07b03fdfa3f94672606a9f07308ab69ece2cec1c51eb3c3e9ef7e4ee517"
+    },
+    {
+      "path": "metadata/study-status.json",
+      "bytes": 329,
+      "sha256": "dea7d3d05dd1c23ce50a933e2556d76741f313e46cc4842787bf9a2081f89dbf"
+    },
+    {
+      "path": "metadata/token-length-profile.json",
+      "bytes": 910,
+      "sha256": "8d0d2120e25c05ae6381583c01a15cf7eed83a86f2f441440968772ef3314e98"
+    },
+    {
+      "path": "models/frozen/best/detector.json",
+      "bytes": 1673,
+      "sha256": "2630de3640c2174d6ecb93b3cde397c6c0f636422d13d10944d1cac3d1d9bce9"
+    },
+    {
+      "path": "models/frozen/best/encoder_config/config.json",
+      "bytes": 573,
+      "sha256": "e3af481d856942a48691e61fd5d46db73ebd042b8ac96b50c69e3a0cc17df0eb"
+    },
+    {
+      "path": "models/frozen/best/model.safetensors",
+      "bytes": 267832232,
+      "sha256": "1489c5dbb31e450a710a4f90b3ad0f7ef6586aba7f439bad5a70d2cd9745e31e"
+    },
+    {
+      "path": "models/frozen/best/tokenizer.json",
+      "bytes": 711494,
+      "sha256": "435667fab0c06c165b1283ecb422497c37124f2d6a35b2ac73dc876332fc9518"
+    },
+    {
+      "path": "models/frozen/best/tokenizer_config.json",
+      "bytes": 349,
+      "sha256": "04c4c3f8c445a1415ccbb7578053de0d66aeeb2f34b2bee6073e599cf39a0516"
+    },
+    {
+      "path": "models/frozen/last/detector.json",
+      "bytes": 1673,
+      "sha256": "68a74fc04d1cf089792b443744d8fb92959c6722501472a969e3c37ae6544159"
+    },
+    {
+      "path": "models/frozen/last/encoder_config/config.json",
+      "bytes": 573,
+      "sha256": "e3af481d856942a48691e61fd5d46db73ebd042b8ac96b50c69e3a0cc17df0eb"
+    },
+    {
+      "path": "models/frozen/last/model.safetensors",
+      "bytes": 267832232,
+      "sha256": "17e00e4fa639c5a235c7dd55f9cb0e7212e20aefbff281bb963f1870e59b95eb"
+    },
+    {
+      "path": "models/frozen/last/tokenizer.json",
+      "bytes": 711494,
+      "sha256": "435667fab0c06c165b1283ecb422497c37124f2d6a35b2ac73dc876332fc9518"
+    },
+    {
+      "path": "models/frozen/last/tokenizer_config.json",
+      "bytes": 349,
+      "sha256": "04c4c3f8c445a1415ccbb7578053de0d66aeeb2f34b2bee6073e599cf39a0516"
+    },
+    {
+      "path": "models/frozen/last/training_state.pt",
+      "bytes": 4755397,
+      "sha256": "fd57bcf54ec6884216ea683727947b4eea0878845a0b174e27758bbeec346b6f"
+    },
+    {
+      "path": "models/full/best/detector.json",
+      "bytes": 1676,
+      "sha256": "87ef411f6d0bc2051147bca4e05247f8e4871d0f1d29281142be0bcd44c2ea4f"
+    },
+    {
+      "path": "models/full/best/encoder_config/config.json",
+      "bytes": 573,
+      "sha256": "e3af481d856942a48691e61fd5d46db73ebd042b8ac96b50c69e3a0cc17df0eb"
+    },
+    {
+      "path": "models/full/best/model.safetensors",
+      "bytes": 267832232,
+      "sha256": "e64d9b21a4a81f0c00cc26ed0395480bdd2e912053395e8459f53a181097ac99"
+    },
+    {
+      "path": "models/full/best/tokenizer.json",
+      "bytes": 711494,
+      "sha256": "435667fab0c06c165b1283ecb422497c37124f2d6a35b2ac73dc876332fc9518"
+    },
+    {
+      "path": "models/full/best/tokenizer_config.json",
+      "bytes": 349,
+      "sha256": "04c4c3f8c445a1415ccbb7578053de0d66aeeb2f34b2bee6073e599cf39a0516"
+    },
+    {
+      "path": "models/full/last/detector.json",
+      "bytes": 1681,
+      "sha256": "1b59a082c680c1a0a69cd0e8e9c46c923b6a5dc5a75dc04702da8e32f4ef08eb"
+    },
+    {
+      "path": "models/full/last/encoder_config/config.json",
+      "bytes": 573,
+      "sha256": "e3af481d856942a48691e61fd5d46db73ebd042b8ac96b50c69e3a0cc17df0eb"
+    },
+    {
+      "path": "models/full/last/model.safetensors",
+      "bytes": 267832232,
+      "sha256": "8ee8419cd914c54275477ebf38b6f82c3e48f5143eb4e3fcfbf82993bb57c9e1"
+    },
+    {
+      "path": "models/full/last/tokenizer.json",
+      "bytes": 711494,
+      "sha256": "435667fab0c06c165b1283ecb422497c37124f2d6a35b2ac73dc876332fc9518"
+    },
+    {
+      "path": "models/full/last/tokenizer_config.json",
+      "bytes": 349,
+      "sha256": "04c4c3f8c445a1415ccbb7578053de0d66aeeb2f34b2bee6073e599cf39a0516"
+    },
+    {
+      "path": "models/full/last/training_state.pt",
+      "bytes": 535740491,
+      "sha256": "bbf35dd7827693c34d187565e7a3abfd5c30fdf4cdd7b1ae455d2f76967d0830"
+    },
+    {
+      "path": "models/mean/best/detector.json",
+      "bytes": 1682,
+      "sha256": "41fe9765549ed8adb9c9fee76ee1ba266f80082384e9f3958d107e7608f96589"
+    },
+    {
+      "path": "models/mean/best/encoder_config/config.json",
+      "bytes": 573,
+      "sha256": "e3af481d856942a48691e61fd5d46db73ebd042b8ac96b50c69e3a0cc17df0eb"
+    },
+    {
+      "path": "models/mean/best/model.safetensors",
+      "bytes": 267832232,
+      "sha256": "654a10a3ca6191ae45711a0a440f8c0acab0363bddb1b8c5ec80a780576d5fb0"
+    },
+    {
+      "path": "models/mean/best/tokenizer.json",
+      "bytes": 711494,
+      "sha256": "435667fab0c06c165b1283ecb422497c37124f2d6a35b2ac73dc876332fc9518"
+    },
+    {
+      "path": "models/mean/best/tokenizer_config.json",
+      "bytes": 349,
+      "sha256": "04c4c3f8c445a1415ccbb7578053de0d66aeeb2f34b2bee6073e599cf39a0516"
+    },
+    {
+      "path": "models/mean/last/detector.json",
+      "bytes": 1682,
+      "sha256": "41fe9765549ed8adb9c9fee76ee1ba266f80082384e9f3958d107e7608f96589"
+    },
+    {
+      "path": "models/mean/last/encoder_config/config.json",
+      "bytes": 573,
+      "sha256": "e3af481d856942a48691e61fd5d46db73ebd042b8ac96b50c69e3a0cc17df0eb"
+    },
+    {
+      "path": "models/mean/last/model.safetensors",
+      "bytes": 267832232,
+      "sha256": "654a10a3ca6191ae45711a0a440f8c0acab0363bddb1b8c5ec80a780576d5fb0"
+    },
+    {
+      "path": "models/mean/last/tokenizer.json",
+      "bytes": 711494,
+      "sha256": "435667fab0c06c165b1283ecb422497c37124f2d6a35b2ac73dc876332fc9518"
+    },
+    {
+      "path": "models/mean/last/tokenizer_config.json",
+      "bytes": 349,
+      "sha256": "04c4c3f8c445a1415ccbb7578053de0d66aeeb2f34b2bee6073e599cf39a0516"
+    },
+    {
+      "path": "models/mean/last/training_state.pt",
+      "bytes": 535740491,
+      "sha256": "090cf00eeaa0cd0ef2f2e017a42a15dd91463fa4e9ef8878307b262b0976292b"
+    },
+    {
+      "path": "reports/experiment-results.json",
+      "bytes": 51117,
+      "sha256": "4799ccb23d49c816a74267e8bc7a675ae914808029b9c668362a37565e014fb2"
+    },
+    {
+      "path": "results/frozen-test/evaluation.png",
+      "bytes": 57778,
+      "sha256": "4f3138654669381caa3dd5041a9245d5d1121f6166b8db63d6a3ed6fb1263510"
+    },
+    {
+      "path": "results/frozen-test/learning-curves.png",
+      "bytes": 65925,
+      "sha256": "280fe41cc67725610402aec572dc9984284524dd15b98eaf3d5eee334fc7493f"
+    },
+    {
+      "path": "results/frozen-test/metrics.json",
+      "bytes": 11096,
+      "sha256": "269c4b153592bfe6f1e31189e3423bb8e4bcfdf49862250f6a9f2660f892c6b4"
+    },
+    {
+      "path": "results/frozen-test/predictions.jsonl",
+      "bytes": 1294015,
+      "sha256": "058e3fb440229d5d6b25113d7efd53d776fba9c5ae66e0e5cf5ea901ed61331b"
+    },
+    {
+      "path": "results/full-test/evaluation.png",
+      "bytes": 54195,
+      "sha256": "d747f755d18aa9f6268dc03fe0485b8b799946f6c810d60a90f942f8a6859be5"
+    },
+    {
+      "path": "results/full-test/learning-curves.png",
+      "bytes": 54466,
+      "sha256": "cd0db9b2d5c7067906553e69b246785a9bc551b128a7c90edf27d2ed70660dc4"
+    },
+    {
+      "path": "results/full-test/metrics.json",
+      "bytes": 11070,
+      "sha256": "1dfd980a9df5bf5c49d4d73069615f60a41135405c1b375c9ea8343fff04cb72"
+    },
+    {
+      "path": "results/full-test/predictions.jsonl",
+      "bytes": 1299245,
+      "sha256": "242c5eddb29fd1ad12d6952d867265865773c9c4d2302997e548f662bd7d5187"
+    },
+    {
+      "path": "results/mean-test/evaluation.png",
+      "bytes": 53012,
+      "sha256": "17f414a3b6a118ffd8509f9dd9606a325a759e2a057c947b819c4b8bd03d4a89"
+    },
+    {
+      "path": "results/mean-test/learning-curves.png",
+      "bytes": 56063,
+      "sha256": "d3e7d009eb41a079ada08a860fc14cde5820cb46c1643f11665beddf8be1b080"
+    },
+    {
+      "path": "results/mean-test/metrics.json",
+      "bytes": 11070,
+      "sha256": "93e5f0e89d8c2165f2bb141f57c527f1aad5802b495144b4ac1debf1c00d2298"
+    },
+    {
+      "path": "results/mean-test/predictions.jsonl",
+      "bytes": 1299169,
+      "sha256": "37e437a8a62e188e1567147b70831e133aa17f91f2ef997e81dc365359b1ba7b"
+    },
+    {
+      "path": "results/security/responses.jsonl",
+      "bytes": 14973,
+      "sha256": "98fdc67e900babd665f2ace4ea2cc0aef3d2f640f0cacf2d137abcd7a59c995f"
+    },
+    {
+      "path": "results/security/security-metrics.json",
+      "bytes": 1113,
+      "sha256": "78800b8dd59ab082d70539507153216956eadc9ddb087367f415466795747d62"
+    },
+    {
+      "path": "splits/manifest.json",
+      "bytes": 4467,
+      "sha256": "2b59ec0caf4344e1628d38ccd181c0a42251b358538ce0426e97b73719e1ad87"
+    },
+    {
+      "path": "splits/test.jsonl",
+      "bytes": 4528088,
+      "sha256": "656facd8242577452e07ecb63bb0da7ec84082628e45cfd640f686083439a378"
+    },
+    {
+      "path": "splits/train.jsonl",
+      "bytes": 36591559,
+      "sha256": "baa7c7547c8c83be84bb629442f1ba463d4153167c065c6f8e3ca0726689a61b"
+    },
+    {
+      "path": "splits/validation.jsonl",
+      "bytes": 4668902,
+      "sha256": "58790d45be671fae0ca12ba2646c39f72176b74f7d64419f67135018a696adf3"
+    }
+  ],
+  "notes": [
+    "Git stores this manifest and aggregate evidence, not the local weights or data.",
+    "Snapshot includes best and last checkpoints, optimizer state, splits, histories and evaluation artifacts.",
+    "Original test has now been examined; use independent evidence for future tuning/generalization claims.",
+    "Snapshot manifest copy is not self-hashed; verify against this committed manifest."
+  ]
+}

@@ -25,3 +25,6 @@ checkpoints/
 *.egg-info/
 build/
 dist/
+
+# Personal explanatory report
+/result.md

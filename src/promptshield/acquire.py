@@ -6,7 +6,7 @@ from pathlib import Path
 
 import requests
 
-from promptshield.common import sha256, write_json
+from promptshield.common import read_json, sha256, write_json
 
 EXPECTED_BLOBS = {
     "train.json": "c237dbe9b972cbd8f55e28d378e819173a59737c",
@@ -18,18 +18,24 @@ def blob_sha(data):
     return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
 
 
-def acquire(destination, with_backbone=True):
+def acquire(destination, with_backbone=True, baseline=None):
     root = Path(destination)
     root.mkdir(parents=True, exist_ok=True)
     session = requests.Session()
     session.headers["User-Agent"] = "PromptShield-research/0.1"
+    pinned = read_json(baseline)["data_provenance"] if baseline else None
     manifest = {"repository": "leolee99/PIGuard", "files": {}}
     # Resolve a repository revision for reproducible URLs; content must also match our audited blobs.
-    response = session.get("https://api.github.com/repos/leolee99/PIGuard/commits/main", timeout=60)
-    response.raise_for_status()
-    revision = response.json()["sha"]
+    if pinned:
+        revision = pinned["repository_revision"]
+    else:
+        response = session.get("https://api.github.com/repos/leolee99/PIGuard/commits/main", timeout=60)
+        response.raise_for_status()
+        revision = response.json()["sha"]
     manifest["repository_revision"] = revision
     for name, expected in EXPECTED_BLOBS.items():
+        if pinned and pinned["files"][name]["git_blob_sha"] != expected:
+            raise ValueError("Requested baseline does not match this implementation's audited dataset blobs.")
         path = root / name
         url = f"https://raw.githubusercontent.com/leolee99/PIGuard/{revision}/datasets/{name}"
         if not path.exists():
@@ -42,14 +48,16 @@ def acquire(destination, with_backbone=True):
         if blob_sha(path.read_bytes()) != expected:
             raise ValueError(f"Existing {path} failed audited blob verification.")
         manifest["files"][name] = {"url": url, "git_blob_sha": expected, "sha256": sha256(path)}
+        if pinned and manifest["files"][name]["sha256"] != pinned["files"][name]["sha256"]:
+            raise ValueError(f"{name} failed baseline SHA256 verification.")
         print(f"Verified {name}: {path.stat().st_size:,} bytes", flush=True)
     if with_backbone:
         # Cache stays under ignored raw data, rather than the user's home directory.
         os.environ.setdefault("HF_HOME", str((root / ".cache/huggingface").resolve()))
         from transformers import AutoTokenizer, DistilBertModel
         from huggingface_hub import HfApi
-        name = "distilbert/distilbert-base-uncased"
-        revision = HfApi().model_info(name).sha
+        name = pinned["backbone"]["model_name"] if pinned else "distilbert/distilbert-base-uncased"
+        revision = pinned["backbone"]["revision"] if pinned else HfApi().model_info(name).sha
         if not revision:
             raise ValueError("Unable to resolve pretrained-model revision.")
         tokenizer = AutoTokenizer.from_pretrained(name, revision=revision, trust_remote_code=False)
@@ -60,6 +68,8 @@ def acquire(destination, with_backbone=True):
         tokenizer.save_pretrained(backbone)
         manifest["backbone"] = {"model_name": name, "revision": revision, "path": str(backbone),
                                 "weights_sha256": sha256(backbone / "model.safetensors")}
+        if pinned and manifest["backbone"]["weights_sha256"] != pinned["backbone"]["weights_sha256"]:
+            raise ValueError("Serialized encoder differs from baseline. Check the recorded package versions before training.")
         print(f"Saved pretrained backbone at revision {revision}", flush=True)
     write_json(root / "provenance.json", manifest)
     return manifest
@@ -69,8 +79,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", default="data/raw/piguard")
     parser.add_argument("--data-only", action="store_true")
+    parser.add_argument("--baseline", help="Baseline manifest: use its exact repository/model revisions and hashes.")
     args = parser.parse_args()
-    acquire(args.output, not args.data_only)
+    acquire(args.output, not args.data_only, args.baseline)
 
 
 if __name__ == "__main__":
