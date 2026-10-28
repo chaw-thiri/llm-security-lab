@@ -1,0 +1,32 @@
+{
+  "split_sha256": "baa7c7547c8c83be84bb629442f1ba463d4153167c065c6f8e3ca0726689a61b",
+  "split": "data/splits/piguard-v1/train.jsonl",
+  "max_length_including_special_tokens": 512,
+  "all": {
+    "rows": 58799,
+    "median_tokens": 35.0,
+    "p95_tokens": 351.0,
+    "max_tokens": 15748,
+    "above_cap": 1772,
+    "fraction_above_cap": 0.03013656694841749
+  },
+  "by_label": {
+    "0": {
+      "rows": 47161,
+      "median_tokens": 27.0,
+      "p95_tokens": 248.0,
+      "max_tokens": 8229,
+      "above_cap": 550,
+      "fraction_above_cap": 0.011662178494942855
+    },
+    "1": {
+      "rows": 11638,
+      "median_tokens": 110.0,
+      "p95_tokens": 880.0,
+      "max_tokens": 15748,
+      "above_cap": 1222,
+      "fraction_above_cap": 0.10500085925416738
+    }
+  },
+  "scope": "Training input lengths only. Exceeding cap means content would be truncated; it does not identify the attack's location."
+}

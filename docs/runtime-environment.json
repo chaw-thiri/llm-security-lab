@@ -1,0 +1,17 @@
+{
+  "python": "3.14.2",
+  "system": "Darwin",
+  "machine": "arm64",
+  "packages": {
+    "torch": "2.14.1",
+    "transformers": "5.19.0",
+    "numpy": "2.5.4",
+    "scikit-learn": "1.9.1",
+    "requests": "2.34.2",
+    "safetensors": "0.8.0",
+    "matplotlib": "3.11.2",
+    "huggingface-hub": "1.33.0",
+    "tokenizers": "0.23.3",
+    "scipy": "1.18.1"
+  }
+}

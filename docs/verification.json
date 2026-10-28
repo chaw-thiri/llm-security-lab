@@ -1,0 +1,21 @@
+{
+  "verified_at_utc": "2026-10-28T12:02:06.588976+00:00",
+  "offline_tests_passed": 18,
+  "real_mps_forward_backward": true,
+  "real_model_diagnostic_updates": 8,
+  "checkpoint_reload_and_validation_plotting": "passed",
+  "throughput_benchmark": {
+    "device": "mps",
+    "measured_batches": 30,
+    "warmup_batches": 5,
+    "batch_size": 4,
+    "max_length": 512,
+    "seconds_per_batch": 0.28616050275353094,
+    "examples_per_second": 13.97816945913457,
+    "estimated_training_hours": 3.5054065419593465,
+    "scope": "Real encoder/head forward, backward, clipping and AdamW; updates every batch. Excludes tokenization, validation, saves; accumulation cadence differs from main run.",
+    "mps_current_allocated_bytes": 1092888064,
+    "mps_driver_allocated_bytes": 4387471360
+  },
+  "note": "Verification milestone only; main-study results are pending and are not inferred from smoke metrics."
+}

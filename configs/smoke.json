@@ -1,0 +1,20 @@
+{
+  "backbone": "data/raw/piguard/backbone",
+  "data_dir": "data/splits/piguard-v1",
+  "run_dir": "runs/smoke",
+  "seed": 42,
+  "epochs": 1,
+  "batch_size": 4,
+  "accumulation_steps": 1,
+  "encoder_lr": 0.00002,
+  "head_lr": 0.00002,
+  "weight_decay": 0.01,
+  "warmup_ratio": 0,
+  "max_length": 128,
+  "pooling": "cls",
+  "dropout": 0.2,
+  "frozen": false,
+  "weighted_loss": false,
+  "max_fpr": 0.02,
+  "device": "mps"
+}
