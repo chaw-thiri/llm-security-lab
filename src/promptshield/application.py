@@ -29,7 +29,7 @@ class OllamaService:
 def process_document(detector, client, task, document):
     if not task.strip():
         raise ValueError("The trusted task must not be empty.")
-    decision = detector.score(document)
+    decision = detector.score(document, task=task)
     # Never forward text beyond the detector's inspected context under this policy.
     if decision["blocked"] or decision["truncated"]:
         return {"blocked": True, "reason": "length_limit" if decision["truncated"] else "injection_score",

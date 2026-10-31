@@ -25,8 +25,14 @@ def load_config(path):
     required = {"backbone", "data_dir", "run_dir", "seed", "epochs", "batch_size", "accumulation_steps",
                 "encoder_lr", "head_lr", "weight_decay", "warmup_ratio", "max_length", "pooling",
                 "dropout", "frozen", "weighted_loss", "max_fpr", "device"}
-    if set(config) - {"initial_checkpoint", "initial_weights_sha256", "paired_batches", "ranking_weight", "ranking_margin"} != required:
-        raise ValueError(f"Config keys differ: missing={required - set(config)}, extra={set(config) - required}")
+    optional = {"initial_checkpoint", "initial_weights_sha256", "paired_batches", "ranking_weight",
+                "ranking_margin", "input_format"}
+    if set(config) - optional != required:
+        missing = required - set(config)
+        extra = set(config) - required - optional
+        raise ValueError(f"Config keys differ: missing={missing}, extra={extra}")
+    if config.get("input_format", "document") not in ("document", "task_document"):
+        raise ValueError("input_format must be document or task_document")
     if bool(config.get("initial_checkpoint")) != bool(config.get("initial_weights_sha256")):
         raise ValueError("Continuation requires both initial_checkpoint and initial_weights_sha256.")
     for key in ("epochs", "batch_size", "accumulation_steps"):

@@ -17,9 +17,14 @@ class Detector:
         self.threshold = self.metadata["threshold"]
         self.max_length = self.metadata["max_length"]
 
-    def score(self, text, chunk=False):
+    def score(self, text, chunk=False, task=None):
         if not isinstance(text, str) or not text.strip():
             raise ValueError("Provide nonempty text.")
+        input_format = self.metadata.get("config", {}).get("input_format", "document")
+        if input_format == "task_document":
+            if not isinstance(task, str) or not task.strip():
+                raise ValueError("This checkpoint requires the trusted task as well as the document.")
+            text = f"TRUSTED TASK:\n{task}\n\nUNTRUSTED DOCUMENT:\n{text}"
         ids = self.tokenizer(text, add_special_tokens=False, truncation=False)["input_ids"]
         capacity = self.max_length - self.tokenizer.num_special_tokens_to_add(pair=False)
         if capacity < 1:
@@ -55,10 +60,11 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--text")
     group.add_argument("--file", type=Path)
+    parser.add_argument("--task", help="Required by task-conditioned checkpoints.")
     parser.add_argument("--chunk", action="store_true", help="Max score across overlapping windows; threshold needs separate validation for this policy.")
     args = parser.parse_args()
     text = args.file.read_text(encoding="utf-8") if args.file else args.text
-    print(json.dumps(Detector(args.checkpoint, args.device).score(text, args.chunk), indent=2))
+    print(json.dumps(Detector(args.checkpoint, args.device).score(text, args.chunk, args.task), indent=2))
 
 
 if __name__ == "__main__":
