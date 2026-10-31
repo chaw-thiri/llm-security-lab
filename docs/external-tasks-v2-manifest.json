@@ -1,0 +1,67 @@
+{
+  "status": "candidates_pending_human_review",
+  "source_revision": "a004b69ec0dd446e0afd461d98cb5e96e120a5d0",
+  "source": "https://github.com/microsoft/BIPIA",
+  "partitions": {
+    "train": {
+      "rows": 7353,
+      "context_groups": 573,
+      "task_types": {
+        "table": 6723,
+        "email": 270,
+        "code": 360
+      },
+      "labels_proposed": {
+        "1": 6536,
+        "0": 817
+      },
+      "within_512_tokens": 6006,
+      "sha256": "5d48922659c41d9a7e0ea558b07290d7740eec3226fe867d485bc4d108f04780"
+    },
+    "validation": {
+      "rows": 1548,
+      "context_groups": 128,
+      "task_types": {
+        "table": 1377,
+        "code": 90,
+        "email": 81
+      },
+      "labels_proposed": {
+        "0": 172,
+        "1": 1376
+      },
+      "within_512_tokens": 1395,
+      "sha256": "041e0c16d732fea090514e63a271f9147c9f6746905472180b5a1d6d0391893f"
+    },
+    "challenge": {
+      "rows": 1458,
+      "context_groups": 145,
+      "task_types": {
+        "table": 882,
+        "code": 450,
+        "email": 126
+      },
+      "labels_proposed": {
+        "0": 162,
+        "1": 1296
+      },
+      "within_512_tokens": 1088,
+      "sha256": "a1fb2ed9d59e3c3e768daa696935ee306e00eb981ef92b81eb121cce4f8040df"
+    }
+  },
+  "audit": {
+    "upstream_context_cross_split_quarantined": 11,
+    "legacy_exposed_challenge_contexts_quarantined": 38
+  },
+  "reviewed_rows": 0,
+  "candidate_rows": 10359,
+  "review_packet_sha256": "21282f8652124d320cf0926f21cd86f356692164b9aa4e3189ffd4f317fb2870",
+  "limitations": [
+    "External authors manually reviewed attack instructions, not all assembled combinations.",
+    "BIPIA source appeared in baseline pretraining-for-classification corpus; new challenge screens known contexts/payloads, not semantic paraphrases.",
+    "Multiple variants of a context are correlated and are not independent documents.",
+    "Long rows remain complete; no training or evaluation policy is silently truncated.",
+    "No challenge text or model scores inspected to choose partitions.",
+    "Third-party context rights and attribution remain as recorded in upstream NOTICE.md."
+  ]
+}

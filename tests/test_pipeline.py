@@ -275,18 +275,26 @@ class ApplicationTests(unittest.TestCase):
             def generate(self, *args): raise AssertionError("Generator must not be called")
         class Detector:
             def __init__(self, blocked, truncated): self.blocked, self.truncated = blocked, truncated
-            def score(self, text): return {"blocked": self.blocked, "truncated": self.truncated}
+            def score(self, text, *, task):
+                self.received = (task, text)
+                return {"blocked": self.blocked, "truncated": self.truncated}
         for blocked, truncated in [(True, False), (False, True)]:
-            result = process_document(Detector(blocked, truncated), Client(), "summarize", "text")
+            detector = Detector(blocked, truncated)
+            result = process_document(detector, Client(), "summarize", "text")
+            self.assertEqual(detector.received, ("summarize", "text"))
             self.assertTrue(result["blocked"])
             self.assertIsNone(result["response"])
 
     def test_allowed_document_and_task_are_forwarded_unchanged(self):
         class Detector:
-            def score(self, text): return {"blocked": False, "truncated": False}
+            def score(self, text, *, task):
+                self.received = (task, text)
+                return {"blocked": False, "truncated": False}
         class Client:
             def generate(self, task, document): return task + ":" + document
-        self.assertEqual(process_document(Detector(), Client(), "task", "document")["response"], "task:document")
+        detector = Detector()
+        self.assertEqual(process_document(detector, Client(), "task", "document")["response"], "task:document")
+        self.assertEqual(detector.received, ("task", "document"))
 
     def test_controlled_cases_and_exact_scoring(self):
         cases = synthetic_cases()

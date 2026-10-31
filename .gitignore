@@ -12,6 +12,7 @@ __pycache__/
 results/
 reports/data_audit/
 data/splits/
+data/review/
 
 # Downloaded datasets
 data/raw/
