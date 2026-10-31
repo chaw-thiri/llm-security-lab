@@ -1,0 +1,28 @@
+{
+  "train_pairs": 512,
+  "development_pairs": 64,
+  "challenge_pairs": 64,
+  "max_contextual_tokens": 74,
+  "full_validation_rows": 7351,
+  "updates_per_run": 512,
+  "training_source": "Synthetic templates authored and structurally reviewed in this session; not independently human-labeled.",
+  "label_rule": "Discussed/historical/rejected instructions are benign; active redirection of the current assistant is attack. Quotation alone never sets the label.",
+  "checks": [
+    "Both labels under quoted/unquoted conditions",
+    "Pair family disjointness across train/development/challenge",
+    "No normalized exact overlap with original splits",
+    "No synthetic truncation",
+    "Control and treatment equal row and label counts"
+  ],
+  "limitations": [
+    "Template-generated examples are correlated; row count overstates diversity.",
+    "Same author across splits; not independent external evidence.",
+    "Labels describe intended instruction role, not guaranteed downstream model behavior."
+  ],
+  "hashes": {
+    "train-pairs.jsonl": "0a91a6bcd7105eb54699e2585b9caa897d00afa787d230dec913152587f46fb9",
+    "challenge.jsonl": "b21a35f79b34b576fe67105c51e85b8ee42d2f18dacc89d709f010558a68070c",
+    "development.jsonl": "a50a15ef04fba95fae76e1c801db46649446dcfe9acc4a758b14dbb054cf1604",
+    "application-challenge.jsonl": "5fa94f39fe452bb0546ca7fab5ae319dfb0461047d95e68e817ae4d7554b5324"
+  }
+}

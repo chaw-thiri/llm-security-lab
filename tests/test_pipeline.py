@@ -203,6 +203,49 @@ class ModelTests(unittest.TestCase):
             for a, b in zip(expected.parameters(), actual.parameters()):
                 torch.testing.assert_close(a, b, atol=1e-6, rtol=1e-5)
 
+    def test_paired_ranking_resume_matches_uninterrupted_weights(self):
+        from tokenizers.pre_tokenizers import Whitespace
+        from tokenizers.processors import TemplateProcessing
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            backbone = root / "backbone"
+            torch.manual_seed(3)
+            tiny_model().encoder.save_pretrained(backbone)
+            backend = Tokenizer(WordPiece({"[PAD]": 0, "[UNK]": 1, "[CLS]": 2, "[SEP]": 3, "benign": 4, "attack": 5}, unk_token="[UNK]"))
+            backend.pre_tokenizer = Whitespace()
+            backend.post_processor = TemplateProcessing(single="[CLS] $A [SEP]", special_tokens=[("[CLS]", 2), ("[SEP]", 3)])
+            tokenizer = PreTrainedTokenizerFast(tokenizer_object=backend, unk_token="[UNK]", pad_token="[PAD]", cls_token="[CLS]", sep_token="[SEP]")
+            tokenizer.save_pretrained(backbone)
+            splits = root / "splits"
+            rows = [{"id": str(i), "prompt": "attack" if i % 2 else "benign", "label": i % 2, "source": "fixture", "pair_id": str(i // 2)} for i in range(8)]
+            manifest = {"splits": {}}
+            for name, group in [("train", rows), ("validation", rows[:4])]:
+                path = splits / (name + ".jsonl")
+                write_jsonl(path, group)
+                manifest["splits"][name] = {"sha256": sha256(path)}
+            write_json(splits / "manifest.json", manifest)
+            config = {"backbone": str(backbone), "data_dir": str(splits), "run_dir": str(root / "uninterrupted"),
+                "seed": 7, "epochs": 1, "batch_size": 2, "accumulation_steps": 2,
+                "encoder_lr": 0.001, "head_lr": 0.001, "weight_decay": 0.01, "warmup_ratio": 0,
+                "max_length": 16, "pooling": "cls", "dropout": 0.2, "frozen": False,
+                "weighted_loss": False, "max_fpr": 0.5, "device": "cpu", "paired_batches": True, "ranking_weight": 0.5, "ranking_margin": 1.0}
+            config_path = root / "config.json"
+            write_json(config_path, config)
+            train(config_path)
+            expected, _, _ = InjectionClassifier.load(root / "uninterrupted/last")
+            config["run_dir"] = str(root / "interrupted")
+            write_json(config_path, config)
+            (root / "interrupted").mkdir()
+            (root / "interrupted/PAUSE").touch()
+            train(config_path)
+            self.assertEqual(read_json(root / "interrupted/status.json")["status"], "paused")
+            self.assertFalse((root / "interrupted/PAUSE").exists())
+            train(config_path, resume=True)
+            actual, _, _ = InjectionClassifier.load(root / "interrupted/last")
+            self.assertEqual(read_json(root / "interrupted/status.json")["updates"], 2)
+            for a, b in zip(expected.parameters(), actual.parameters()):
+                torch.testing.assert_close(a, b, atol=1e-6, rtol=1e-5)
+
     def test_optimizer_scheduler_and_rng_state_resume(self):
         torch.manual_seed(42)
         model = tiny_model()

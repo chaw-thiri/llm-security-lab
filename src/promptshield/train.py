@@ -17,6 +17,7 @@ from promptshield.classifier import InjectionClassifier
 from promptshield.common import choose_device, read_json, read_jsonl, seed_everything, sha256, synchronize, write_json
 from promptshield.data import Collator, TextDataset
 from promptshield.scoring import metrics, select_threshold
+from promptshield.pairwise import PairedDataset, PairBatchSampler, ranking_sum
 
 
 def load_config(path):
@@ -24,8 +25,10 @@ def load_config(path):
     required = {"backbone", "data_dir", "run_dir", "seed", "epochs", "batch_size", "accumulation_steps",
                 "encoder_lr", "head_lr", "weight_decay", "warmup_ratio", "max_length", "pooling",
                 "dropout", "frozen", "weighted_loss", "max_fpr", "device"}
-    if set(config) != required:
+    if set(config) - {"initial_checkpoint", "initial_weights_sha256", "paired_batches", "ranking_weight", "ranking_margin"} != required:
         raise ValueError(f"Config keys differ: missing={required - set(config)}, extra={set(config) - required}")
+    if bool(config.get("initial_checkpoint")) != bool(config.get("initial_weights_sha256")):
+        raise ValueError("Continuation requires both initial_checkpoint and initial_weights_sha256.")
     for key in ("epochs", "batch_size", "accumulation_steps"):
         if type(config[key]) is not int or config[key] < 1:
             raise ValueError(f"{key} must be a positive integer")
@@ -33,6 +36,10 @@ def load_config(path):
         raise ValueError("Invalid length/warm-up configuration")
     if min(config["encoder_lr"], config["head_lr"]) <= 0 or config["weight_decay"] < 0:
         raise ValueError("Invalid optimizer configuration")
+    if config.get("ranking_weight", 0) < 0 or config.get("ranking_margin", 1) <= 0:
+        raise ValueError("Ranking weight must be nonnegative and margin positive.")
+    if config.get("ranking_weight", 0) and not config.get("paired_batches"):
+        raise ValueError("Ranking requires paired_batches.")
     return config
 
 
@@ -161,10 +168,24 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
         valid_rows = valid_rows[:limit_validation]
     if {r["label"] for r in rows} != {0, 1} or {r["label"] for r in valid_rows} != {0, 1}:
         raise ValueError("Training and validation must each contain both labels.")
-    dataset = TextDataset(rows, tokenizer, config["max_length"])
+    dataset_type = PairedDataset if config.get("paired_batches") else TextDataset
+    dataset = dataset_type(rows, tokenizer, config["max_length"])
     validation = TextDataset(valid_rows, tokenizer, config["max_length"])
     model = InjectionClassifier.from_backbone(config["backbone"], pooling=config["pooling"],
                   dropout=config["dropout"], frozen=config["frozen"]).to(device)
+    if config.get("initial_checkpoint") and not resume:
+        initial = Path(config["initial_checkpoint"])
+        if sha256(initial / "model.safetensors") != config.get("initial_weights_sha256"):
+            raise ValueError("Initial checkpoint hash differs from declared experiment provenance.")
+        loaded, initial_tokenizer, initial_metadata = InjectionClassifier.load(initial, device)
+        if (initial_metadata["pooling"] != config["pooling"] or
+                initial_metadata["frozen"] != config["frozen"] or
+                initial_metadata["dropout"] != config["dropout"] or
+                initial_metadata["max_length"] != config["max_length"] or
+                initial_tokenizer.get_vocab() != tokenizer.get_vocab()):
+            raise ValueError("Continuation architecture/tokenizer differs from the initial checkpoint.")
+        model.load_state_dict(loaded.state_dict())
+        del loaded, initial_tokenizer
     if benchmark_steps:
         return benchmark(model, dataset, tokenizer, device, config, run / "benchmark.json", benchmark_steps)
     optimizer = optimizer_for(model, config)
@@ -215,9 +236,13 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
     paused = False
     try:
         for epoch in range(epoch0, config["epochs"]):
-            loader = DataLoader(dataset, batch_size=config["batch_size"], shuffle=True, num_workers=0,
-                                generator=torch.Generator().manual_seed(config["seed"] + epoch),
-                                collate_fn=Collator(tokenizer))
+            if config.get("paired_batches"):
+                loader = DataLoader(dataset, batch_sampler=PairBatchSampler(rows, config["batch_size"], config["seed"] + epoch),
+                                    generator=torch.Generator().manual_seed(config["seed"] + epoch), collate_fn=Collator(tokenizer))
+            else:
+                loader = DataLoader(dataset, batch_size=config["batch_size"], shuffle=True, num_workers=0,
+                                    generator=torch.Generator().manual_seed(config["seed"] + epoch),
+                                    collate_fn=Collator(tokenizer))
             model.train()
             optimizer.zero_grad(set_to_none=True)
             epoch_loss, epoch_examples = (epoch_loss0, epoch_examples0) if epoch == epoch0 else (0, 0)
@@ -233,8 +258,14 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
                 # Correct sample weighting even for a final partial accumulation window.
                 window_start = index // config["accumulation_steps"] * config["accumulation_steps"] * config["batch_size"]
                 window_examples = min(config["accumulation_steps"] * config["batch_size"], len(dataset) - window_start)
-                (losses.sum() / window_examples).backward()
-                epoch_loss += losses.detach().sum().item()
+                objective = losses.sum()
+                if config.get("ranking_weight", 0):
+                    objective = objective + config["ranking_weight"] * ranking_sum(
+                        logits, batch["labels"], batch["pair_ids"], config.get("ranking_margin", 1.0))
+                if not torch.isfinite(objective):
+                    raise FloatingPointError("Non-finite combined objective.")
+                (objective / window_examples).backward()
+                epoch_loss += objective.detach().item()
                 epoch_examples += len(batch["labels"])
                 boundary = (index + 1) % config["accumulation_steps"] == 0 or index + 1 == len(loader)
                 if boundary:

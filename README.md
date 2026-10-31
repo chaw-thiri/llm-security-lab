@@ -185,3 +185,9 @@ The next question is whether targeted training on confusing legitimate examples 
 - [PyTorch optimization](https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html); [Ollama API](https://docs.ollama.com/api/generate).
 
 Raw third-party datasets are not redistributed here; retain their upstream provenance and attribution when acquiring them.
+
+## Contextual training follow-up
+
+A three seed paired-example study compares continued cross-entropy training with a pairwise ranking loss. Across 128 authored, template-held-out cases, both paired methods caught all 64 labeled attacks at each seed and reduced benign blocks compared with the original-data continuation control. On the matching 64 case Llama application replay, they completed 39–40 legitimate tasks on average; the baseline completed 5. This is a focused synthetic result, not an independent benchmark or production guarantee. The original test-set F1 changed slightly, so the improvement is specific to the contextual challenge and application utility.
+
+The ranking loss added only a small average difference from cross-entropy. The experiment report recommends cross-entropy as the simpler follow-up candidate while keeping the tagged baseline as the stable reference. Read the [full per-seed results](docs/context-v2-results.md), [fixed protocol](docs/context-v2-protocol.md), and [data review](docs/context-v2-data-review.json). Reproduction commands are in the protocol. The new checkpoints and raw application responses remain local under ignored `runs/` and `results/` directories.
