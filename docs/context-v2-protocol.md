@@ -1,6 +1,6 @@
-# Contextual training v2 — fixed experiment protocol
+# Contextual training v2 : fixed experiment protocol
 
-Question: can a stronger contextual-pair continuation improve attack/explanation ranking while preserving original detection performance?
+## Question: can a stronger contextual-pair continuation improve attack/explanation ranking while preserving original detection performance?
 
 All arms start from the baseline full checkpoint, verified by SHA256. Each uses 4,096 rows, two epochs (512 optimizer updates), seed 42, learning rates 5e-6, effective batch 16, dropout 0.2, and a fresh AdamW/scheduler. Original-only control and treatments have equal row and label counts. Treatments contain 512 benign/attack pairs (1,024 examples) plus 3,072 original training examples. CE and ranking treatments share identical rows, pair-preserving batches, random order and update budgets. No model-size or pooling changes.
 
@@ -12,7 +12,7 @@ Before challenge scoring, a treatment is promising if contextual development FPR
 
 Data review: training uses eight contextual wrapper families, development four different families, and the challenge four additional families. Each contains quoted and unquoted examples under both labels. Attack examples include educational framing that nevertheless commands active redirection. Benign labels describe explanations, historical records, or rejected commands. Exact normalized overlap and token-length checks are recorded in context-v2-data-review.json. Metadata is not tokenized. Family names and pair IDs organize sampling/evaluation only.
 
-All cases were authored in this session and structurally reviewed. They are not independently human-annotated or external validation. Template products are correlated; 1,024 rows do not represent 1,024 independent attack styles. Intended benign documents can still hijack the downstream LLM, so downstream safety is measured rather than inferred from labels.
+All cases were authored in this session and structurally reviewed. They are not independently human-annotated or external validation. Template products are correlated;** 1,024 rows do not represent 1,024 independent attack styles**. Intended benign documents can still hijack the downstream LLM, so downstream safety is measured rather than inferred from labels.
 
 Evaluate the locked 128-example challenge and the previously inspected original test without selecting thresholds from either. Run Llama on each of the 128 new task/document cases once and reuse the actual response for every gate that forwards the identical document. Record the model digest, server version and generation settings. This cached-response replay isolates gating; do not describe it as independent generation for every model. Report attack successes, legitimate-task completion, and blocked counts. Retain the baseline unless evidence supports an improvement; no automatic deployment.
 
@@ -22,5 +22,4 @@ python -m unittest discover -s tests -p 'test_*.py'
 python scripts/run_context_v2.py
 python scripts/evaluate_context_v2.py
 ```
-
-Preparation refuses overwrite. The study runner resumes incomplete runs and skips completed ones; normal training pause markers still apply. Results go to results/context-v2 and docs/context-v2-results.json. Private result.md and blueprint.md remain excluded from Git.
+Results go to results/context-v2 and docs/context-v2-results.json. 
