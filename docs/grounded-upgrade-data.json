@@ -1,0 +1,235 @@
+{
+  "status": "frozen_before_training",
+  "initial_weights_sha256": "e64d9b21a4a81f0c00cc26ed0395480bdd2e912053395e8459f53a181097ac99",
+  "protocol_sha256": "bf06f79b9b3af485d6740ac7073ed69611adac83ebd2cc25799ac2b54377b9f2",
+  "source_partition": {
+    "python-csv": "train",
+    "python-venv": "train",
+    "python-sqlite": "train",
+    "python-pathlib": "train",
+    "python-logging": "train",
+    "python-hashlib": "train",
+    "python-json": "validation",
+    "python-subprocess": "validation",
+    "python-copy": "regression",
+    "python-argparse": "regression",
+    "owasp-ssrf": "train",
+    "owasp-secrets": "train",
+    "owasp-input": "train",
+    "owasp-prompt-injection": "train",
+    "owasp-xss": "train",
+    "owasp-sql": "train",
+    "owasp-session": "validation",
+    "owasp-passwords": "validation",
+    "owasp-csrf": "regression",
+    "owasp-command": "regression",
+    "nps-old-faithful": "train",
+    "usgs-water": "train",
+    "login-gov-verify": "train",
+    "archives-constitution": "train",
+    "noaa-flood": "train",
+    "noaa-hurricane": "train",
+    "nasa-mars": "validation",
+    "nasa-moon": "validation",
+    "usa-branches": "regression",
+    "nps-canyon": "regression"
+  },
+  "fresh_source_plan_sha256": "35c4f74296ae336ea7a6feabf79ced87e4f6d82eb284ee924647b849491919c6",
+  "fresh_sources": [
+    {
+      "id": "fresh-datetime",
+      "url": "https://docs.python.org/3.13/library/datetime.html",
+      "final_url": "https://docs.python.org/3.13/library/datetime.html",
+      "retrieved_at": "2026-10-31T16:59:28.047167+00:00",
+      "html_sha256": "dd5b4d691548b4dfd2d18029f447bce75f105e25baf3c4b861c5892eefc8bd76",
+      "text_sha256": "d84da3b89ce987ca900af84fc7b540605a9a72071138853b592b8885c78b0699",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-collections",
+      "url": "https://docs.python.org/3.13/library/collections.html",
+      "final_url": "https://docs.python.org/3.13/library/collections.html",
+      "retrieved_at": "2026-10-31T16:59:28.032756+00:00",
+      "html_sha256": "46c6079e40c5abcb8bad54bf7413ef2219cf2ad3390c4628a005daed4976d95c",
+      "text_sha256": "d38ba6a6e6c7a0ef3e08e7aedbcfaabf50c7d242bd202a641a09c04d53f8d97a",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-itertools",
+      "url": "https://docs.python.org/3.13/library/itertools.html",
+      "final_url": "https://docs.python.org/3.13/library/itertools.html",
+      "retrieved_at": "2026-10-31T16:59:28.001337+00:00",
+      "html_sha256": "4c856c973910c38c7e0f10180446ece00beccfe207d3aaaf67115c7846a36ddc",
+      "text_sha256": "2803354cacb5a3ca83619c274d53624bbc92a892b9b245b92b257a43d7d44d5c",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-functools",
+      "url": "https://docs.python.org/3.13/library/functools.html",
+      "final_url": "https://docs.python.org/3.13/library/functools.html",
+      "retrieved_at": "2026-10-31T16:59:28.044590+00:00",
+      "html_sha256": "5475d1ac7019d1209b8bba66987903328a6e721d2ab6e34c112bf30b92a8e366",
+      "text_sha256": "a1bafe41a7fedb83c08f7256863a8c23442b4b28015b3a09b28a6d2967d6df34",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-tempfile",
+      "url": "https://docs.python.org/3.13/library/tempfile.html",
+      "final_url": "https://docs.python.org/3.13/library/tempfile.html",
+      "retrieved_at": "2026-10-31T16:59:28.665241+00:00",
+      "html_sha256": "446288dd137f16096280ca2c0d22c45280c60a511178b84a2d7f582c3a02769d",
+      "text_sha256": "bf818f0be8c75a203f5a7aa4afa6b22e681720eea5603ccd001886ae46ad217f",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-gzip",
+      "url": "https://docs.python.org/3.13/library/gzip.html",
+      "final_url": "https://docs.python.org/3.13/library/gzip.html",
+      "retrieved_at": "2026-10-31T16:59:28.541854+00:00",
+      "html_sha256": "f2344c620a8ae34628c553f9d24baf8c7346345bb4afe398ad5349f05646d6f7",
+      "text_sha256": "b79715dea9558fd90774e87c69cd202dade6575f30c62fefe9aaa8b386daa84c",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-logging-security",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html",
+      "final_url": "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html",
+      "retrieved_at": "2026-10-31T16:59:28.714768+00:00",
+      "html_sha256": "604378c015d263638d7fd3c066762e7da7ed104be7fa974223f085b5bf330bb9",
+      "text_sha256": "520e150910b3e16b0822294637e7b6c150267ac327d1e05c4a3a4e22160b7815",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-authentication",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html",
+      "final_url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html",
+      "retrieved_at": "2026-10-31T16:59:28.590207+00:00",
+      "html_sha256": "911f19e84d5debb7b5337f1c893f06b2d4da09bb684b25c2457dd2c2e0536340",
+      "text_sha256": "e3d065100739c23d06c20c9eced97bfa8787de428d8cacb9ce0bac089d471b4e",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-tls",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html",
+      "final_url": "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html",
+      "retrieved_at": "2026-10-31T16:59:28.750622+00:00",
+      "html_sha256": "1fb1aa028149944602f97f9525c381eb7cbd07e1b9ae813c075164ff98ca50fd",
+      "text_sha256": "35c2bbfbfc91a3b6688a8d46c32d807e7391057744771f84607839fbb6e1c4f6",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-upload",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+      "final_url": "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html",
+      "retrieved_at": "2026-10-31T16:59:28.979475+00:00",
+      "html_sha256": "7dc83809e70820674c1fc2a2956eb86888433a5ac9362f33fb74b9b0c61e8f28",
+      "text_sha256": "a1bb695f446e654572130263cdc4f1928c61bf3523d051b1396bc969491cd358",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-clickjacking",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html",
+      "final_url": "https://cheatsheetseries.owasp.org/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html",
+      "retrieved_at": "2026-10-31T16:59:29.055761+00:00",
+      "html_sha256": "581d13641362de36eb03866b8cf52a89a713fca6bec8610b9cba9b973dd39d48",
+      "text_sha256": "bb53f6b00b60ba8b4af30b2e428d61f68b6b547c69967a85a84382df5e9464eb",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-crypto",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+      "final_url": "https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html",
+      "retrieved_at": "2026-10-31T16:59:29.173866+00:00",
+      "html_sha256": "cd98664bce812c781a456b23cc4f7dc6754708bede5ad262bfa1358fb1748aae",
+      "text_sha256": "462afce4ed2aefc54c218fbeea276574d3c3a32fb864f596feaa13a56449a4fb",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-venus",
+      "url": "https://science.nasa.gov/venus/facts/",
+      "final_url": "https://science.nasa.gov/venus/venus-facts/",
+      "retrieved_at": "2026-10-31T16:59:30.260624+00:00",
+      "html_sha256": "6f5c56be913a9aa82ff9249b50427ff98a44091baccc704b15c48a95688146e3",
+      "text_sha256": "96d5749a9bb9977ec3bd06616f07f8a0811151a20b45f17d6ed95dec36eaa9d2",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-jupiter",
+      "url": "https://science.nasa.gov/jupiter/facts/",
+      "final_url": "https://science.nasa.gov/jupiter/jupiter-facts/",
+      "retrieved_at": "2026-10-31T16:59:30.791419+00:00",
+      "html_sha256": "a569fe55487a9bcf0a18624a27f81c0150a4aa9ed79bbcb2b256b4c93fdb28ac",
+      "text_sha256": "a83991934bf5930832f87779600f94bd1221b1c0c475f4016576a496fd434108",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-tsunami",
+      "url": "https://oceanservice.noaa.gov/facts/tsunami.html",
+      "final_url": "https://oceanservice.noaa.gov/facts/tsunami.html",
+      "retrieved_at": "2026-10-31T16:59:30.483073+00:00",
+      "html_sha256": "f86407f6026893ff60565120b7bd3ff0f309f5d87bf0b2d79c505ecdb2da6544",
+      "text_sha256": "2ab260a0592b99393b088cb0c59d53e19dfbc7c987a47146c92d3a96cc3a5bc2",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": false
+    },
+    {
+      "id": "fresh-oxygen",
+      "url": "https://oceanservice.noaa.gov/facts/ocean-oxygen.html",
+      "final_url": "https://oceanservice.noaa.gov/facts/ocean-oxygen.html",
+      "retrieved_at": "2026-10-31T16:59:30.524649+00:00",
+      "html_sha256": "beb025d64c71184d2b6730c2a62c22843e7df375986dc94653f84b5bcca1c915",
+      "text_sha256": "52740d6318aebcd78493ab4e4cc26aa11a03aa1f44c67a9d5abc69fa398b38cc",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": false
+    },
+    {
+      "id": "fresh-evaporation",
+      "url": "https://www.usgs.gov/water-science-school/science/evaporation-and-water-cycle",
+      "final_url": "https://www.usgs.gov/water-science-school/science/evaporation-and-water-cycle",
+      "retrieved_at": "2026-10-31T16:59:32.818683+00:00",
+      "html_sha256": "dbfd19210f93a6183720e320e440fef1734aa420426e39acabb25c318c53fec0",
+      "text_sha256": "10d90e5b77c38285ab5a141abd0e603d1a5954d5de252e09f3ecd13d8d7bd94f",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    },
+    {
+      "id": "fresh-yosemite",
+      "url": "https://www.nps.gov/yose/learn/nature/geology.htm",
+      "final_url": "https://www.nps.gov/yose/learn/nature/geology.htm",
+      "retrieved_at": "2026-10-31T16:59:31.269004+00:00",
+      "html_sha256": "3b6e89b8fa1ec1debd747ecf3cb6bafa3d54f613c8d36498357af55449008a55",
+      "text_sha256": "8b8e7b993d8ec51350f266df73d8d72279feb91814fd3e996ecee0db050ab125",
+      "extraction": "HTMLParser visible main/article text, whitespace and Unicode normalization",
+      "main_region_found": true
+    }
+  ],
+  "counts": {
+    "rows_per_arm": 4096,
+    "original_replay": 1536,
+    "real_context_pairs": 1280,
+    "development_rows": 1024,
+    "fresh_rows": 504,
+    "fresh_sources": 18
+  },
+  "human_review_status": "Construction labels only; separate human-review corpus remains pending and unused",
+  "preparation_audit": "Payload/quotation/position sampling decoupled from domain, and identical neutral marker prefixes used under both labels before training.",
+  "source_exposure_note": "Old 30-page validation is now a regression set with declared training/development exposure. Fresh pages use same publishers but distinct URLs.",
+  "hashes": {
+    "development.jsonl": "8abca7fbdbc5f074a8341a8f58f675c8a09ecfb72f3f1f7af5cf68ce834c62a4",
+    "fresh-challenge.jsonl": "73747515a5c1c7b78047671eb07d2e069117e84235e7887a0772e8ee1fe1dba2"
+  }
+}

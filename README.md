@@ -6,7 +6,7 @@ PromptShield fine-tunes DistilBERT to classify document text as benign or inject
 
 ## Status
 
-PromptShield is a research prototype, not a dependable real-world defense. The saved `baseline-v1` remains the reference. Recent experiments reduce false alarms on selected benign examples, but the task-aware pilot also missed more attacks and allowed successful hijacks. See the [research diary](research_diary.md) for the progression and current findings.
+PromptShield is an experimental research prototype. The saved `baseline-v1` remains the reference. [Public-document validation](docs/real-document-results.md) found substantial security/utility trade-offs and document-length limitations; current results do not support a dependable-defense claim. See the [research diary](research_diary.md) for experiment decisions and findings.
 
 ## Pipeline
 
@@ -74,5 +74,7 @@ Git does not contain the ignored model weights or datasets. Details are in the [
 - [Contextual training protocol and results](docs/context-v2-protocol.md) · [results](docs/context-v2-results.md)
 - [External NotInject false-alarm evaluation](docs/notinject-evaluation.md)
 - [Task-aware detector protocol and results](docs/task-aware-protocol.md) · [results](docs/task-aware-results.md)
+- [Real-document validation](docs/real-document-results.md) · [experimental v0.1.0 release draft](docs/v0.1.0-release-notes.md)
+- [Grounded real-context continuation](docs/grounded-upgrade-protocol.md) · [results](docs/grounded-upgrade-results.md)
 
 Raw third-party datasets are not redistributed. See [PIGuard](https://github.com/leolee99/PIGuard), the [DistilBERT model](https://huggingface.co/distilbert/distilbert-base-uncased), and the [Ollama API](https://docs.ollama.com/api/generate) for upstream sources.

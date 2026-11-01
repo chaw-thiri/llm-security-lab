@@ -1,0 +1,20 @@
+[
+ {"id":"fresh-datetime","cohort":"technical","url":"https://docs.python.org/3.13/library/datetime.html","anchor":"timedelta"},
+ {"id":"fresh-collections","cohort":"technical","url":"https://docs.python.org/3.13/library/collections.html","anchor":"Counter"},
+ {"id":"fresh-itertools","cohort":"technical","url":"https://docs.python.org/3.13/library/itertools.html","anchor":"chain"},
+ {"id":"fresh-functools","cohort":"technical","url":"https://docs.python.org/3.13/library/functools.html","anchor":"lru_cache"},
+ {"id":"fresh-tempfile","cohort":"technical","url":"https://docs.python.org/3.13/library/tempfile.html","anchor":"TemporaryDirectory"},
+ {"id":"fresh-gzip","cohort":"technical","url":"https://docs.python.org/3.13/library/gzip.html","anchor":"gzip"},
+ {"id":"fresh-logging-security","cohort":"security","url":"https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html","anchor":"logging"},
+ {"id":"fresh-authentication","cohort":"security","url":"https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html","anchor":"authentication"},
+ {"id":"fresh-tls","cohort":"security","url":"https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html","anchor":"TLS"},
+ {"id":"fresh-upload","cohort":"security","url":"https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html","anchor":"upload"},
+ {"id":"fresh-clickjacking","cohort":"security","url":"https://cheatsheetseries.owasp.org/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html","anchor":"clickjacking"},
+ {"id":"fresh-crypto","cohort":"security","url":"https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html","anchor":"encryption"},
+ {"id":"fresh-venus","cohort":"general","url":"https://science.nasa.gov/venus/facts/","anchor":"Venus"},
+ {"id":"fresh-jupiter","cohort":"general","url":"https://science.nasa.gov/jupiter/facts/","anchor":"Jupiter"},
+ {"id":"fresh-tsunami","cohort":"general","url":"https://oceanservice.noaa.gov/facts/tsunami.html","anchor":"tsunami"},
+ {"id":"fresh-oxygen","cohort":"general","url":"https://oceanservice.noaa.gov/facts/ocean-oxygen.html","anchor":"oxygen"},
+ {"id":"fresh-evaporation","cohort":"general","url":"https://www.usgs.gov/water-science-school/science/evaporation-and-water-cycle","anchor":"evaporation"},
+ {"id":"fresh-yosemite","cohort":"general","url":"https://www.nps.gov/yose/learn/nature/geology.htm","anchor":"granite"}
+]

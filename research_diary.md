@@ -44,10 +44,28 @@ The security trade-off went the other way. At development-selected thresholds, m
 
 See the [fixed protocol](docs/task-aware-protocol.md), [full results](docs/task-aware-results.md), and [machine-readable scores](docs/task-aware-results.json).
 
-## Current next step
-
-The [matched diagnostic report](docs/detector-diagnostic.md) compares ten saved checkpoints on the same inspected synthetic cases and NotInject probes. Even with optimistic thresholds selected on these examples, none reaches 95% attack recall while keeping false alarms below 5% on each benign source. Document-only models reach 43–55% recall at that constraint; their synthetic-only result is 98–99%. This exposes a source-generalization problem that threshold changes alone cannot fix. These are exploratory limits, not validated operating points, and the reserved new challenge was not opened.
+## 5. Error audit and external data candidates
 
 The existing task-aware errors have now been joined to their texts and grouped in the [error audit](docs/task-aware-error-audit.md). A larger externally sourced corpus has been [assembled from official BIPIA data](docs/external-tasks-v2.md): 7,353 training, 1,548 development, and 1,458 unscored challenge candidates covering email questions, tables, and code debugging. Upstream attack instructions were manually reviewed by the authors; our assembled examples still await human review. The new export gate rejects incomplete annotations, and a 60-example development-only starter packet is ready locally.
 
-Next, have people review the starter batch and resolve ambiguities before annotating the remaining candidates. Set task/class sampling and a complete-input length policy, then freeze only reviewed examples. Keep document-only as a control, select thresholds using development data, and reserve the challenge plus fresh application cases. Report attack recall and useful task completion alongside false alarms.
+## 6. Matched threshold and ranking diagnostic
+
+The [matched diagnostic report](docs/detector-diagnostic.md) compares ten saved checkpoints on the same inspected synthetic cases and NotInject probes. Even with optimistic thresholds selected on these examples, none reaches 95% attack recall while keeping false alarms below 5% on each benign source. Document-only models reach 43–55% recall at that constraint; their synthetic-only result is 98–99%. This exposes a source-generalization problem that threshold changes alone cannot fix. These are exploratory limits, not validated operating points, and the reserved new challenge was not opened.
+
+## 7. Real public-document validation
+
+Real-document validation is now complete; see the [fixed protocol and measured report](docs/real-document-results.md). Thirty public sources supplied clean excerpts and 270 controlled attack copies. Baseline blocked 20/30 benign excerpts and 266/270 attacks; four exact marker hijacks remained. Document-only seed 42 blocked no benign excerpts but detected only 95/270 attacks, leaving 82 successful hijacks. Unprotected Llama had 132 hijacks. Both failed the predeclared security-MVP targets. Twenty-seven complete pages exceeded the detector context; the candidate accepted only two complete pages. All 300 serving-gate decisions per detector were checked against the application path, and no uninspected suffix was forwarded.
+
+This supports an explicitly experimental research release, with [draft release notes](docs/v0.1.0-release-notes.md), rather than a dependable-defense claim. The measured failure concentrates in technical/security excerpts. These real-document cases are now disclosed regression evidence and must not become the next supposedly fresh final test.
+
+## 8. Grounded real-context continuation — three seeds
+
+The [fixed protocol](docs/grounded-upgrade-protocol.md) compared balanced, equal-step original-data controls with matched real-context pairs, all continuing from the preserved baseline. Each arm used 4,096 examples and 512 updates; seeds 42, 43 and 44 completed. New pairs carry construction labels, not human review. The [source manifest](docs/grounded-upgrade-data.json) records training/development exposure and 18 additional public source pages frozen before training.
+
+Development improvement qualified for the predeclared three-seed replication, but did not transfer to the fresh 504-case challenge. At development-selected thresholds, grounded models averaged **13.6% attack recall and 0.5% benign false alarms**, versus **8.2% and 2.3%** for controls. Original baseline detected 98.1% but falsely blocked 73.6% of benign cases. Grounded ROC-AUC improved from the controls' 0.729 to 0.916, yet technical/security attack recall remained close to zero. Reduced false alarms therefore do not constitute a dependable defense.
+
+**Decision:** Preserve all attempted runs and the original baseline; do not change the application default. Investigate domain score distributions and the transfer of development thresholds before more training. Full [results](docs/grounded-upgrade-results.md) separate the fresh challenge from previously exposed regression and cached Llama replay. All 54 offline tests passed before training, and all 69 preserved baseline files verified unchanged afterward. The separate human-review corpus and its reserved challenge remain unused.
+
+## Current next step
+
+Investigate whether the failure comes from cross-domain score offsets, inadequate within-domain separation, or both. Analyze development and already measured challenge scores without changing saved thresholds, labeling any challenge-selected operating point as an optimistic diagnostic only. Use the findings to define the next development experiment; further evaluation requires a new untouched challenge. The 512-token complete-document limitation remains a separate application issue.

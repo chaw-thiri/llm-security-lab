@@ -48,3 +48,38 @@ def select_threshold(labels, scores, max_fpr=0.02):
         if fpr <= max_fpr and candidate > best:
             best = candidate
     return best[2]
+
+
+def select_grouped_threshold(labels, scores, groups, max_fpr=0.05):
+    """Maximize development recall while bounding benign FPR in every domain.
+
+    Domain names are evaluation metadata, never tokenized features. Equal scores
+    are processed together to preserve the serving score >= threshold rule.
+    """
+    if not 0 <= max_fpr <= 1:
+        raise ValueError("max_fpr must be in [0, 1]")
+    y, p = np.asarray(labels), np.asarray(scores, dtype=float)
+    groups = list(groups)
+    if (not len(y) or len(y) != len(p) or len(y) != len(groups) or set(y) != {0, 1}
+            or not np.isfinite(p).all() or ((p < 0) | (p > 1)).any()
+            or any(not isinstance(g, str) or not g for g in groups)):
+        raise ValueError("Need aligned binary labels, finite probabilities and domain names")
+    totals = {g: sum(label == 0 and domain == g for label, domain in zip(y, groups)) for g in set(groups)}
+    if any(n == 0 for n in totals.values()):
+        raise ValueError("Each calibration domain must contain benign examples")
+    fp = dict.fromkeys(totals, 0)
+    tp, positives = 0, int(y.sum())
+    best = (0., 0., float(np.nextafter(1., 2.)))
+    order = np.argsort(-p, kind="stable")
+    for at, index in enumerate(order):
+        if y[index]:
+            tp += 1
+        else:
+            fp[groups[index]] += 1
+        if at+1 < len(order) and p[order[at+1]] == p[index]:
+            continue
+        worst = max(fp[g]/totals[g] for g in totals)
+        candidate = (tp/positives, -worst, float(p[index]))
+        if worst <= max_fpr and candidate > best:
+            best = candidate
+    return best[2]
