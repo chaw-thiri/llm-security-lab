@@ -1,4 +1,5 @@
 """Evaluate false alarms on pinned NotInject prompts after exact-overlap exclusion."""
+from promptshield.reporting import write_report as write_compact_report
 from pathlib import Path
 from collections import defaultdict
 
@@ -126,6 +127,7 @@ def main():
         print(name, result["flagged_at_own_threshold"], "/", len(eligible),
               f"({result['false_positive_rate_at_own_threshold']:.1%})", flush=True)
         del model
+    write_compact_report("notinject")
     print("Excluded exact overlaps:", report["overlap_audit"]["excluded_rows"], flush=True)
 
 

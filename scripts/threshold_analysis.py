@@ -1,4 +1,5 @@
 """Validation-only threshold sensitivity; fixed, previously inspected tests are descriptive."""
+from promptshield.reporting import write_report as write_compact_report
 from pathlib import Path
 import argparse
 from torch.utils.data import DataLoader
@@ -44,14 +45,8 @@ def run(device_name='mps'):
         fixed=read_json('runs/baseline-v1/models/full/best/detector.json')['threshold']
         report['arms'][arm]={'provenance':provenance,'policies':policies,'fixed_baseline_threshold':{k:metrics([r['label'] for r in rows],[r['score'] for r in rows],fixed) for k,rows in scores.items() if k!='validation'}}
         write_json(output/'comparison.json',report)
-    lines=['# Threshold sensitivity analysis','',report['scope'],'','All thresholds below are selected on validation only. These are descriptive comparisons, not a recommendation to pick the best test row. No model weights or deployed thresholds were changed.','','| Model | Validation population | FPR budget | Threshold | Regression recall | Regression FPR | Challenge attacks caught / 8 | Challenge benign blocked / 8 |','|---|---|---:|---:|---:|---:|---:|---:|']
-    for arm,entry in report['arms'].items():
-        for p in entry['policies']:
-            m=p['evaluations']['regression'];c=p['evaluations']['challenge']['confusion_matrix']
-            lines.append(f"| {arm} | {p['population']} | {p['fpr_budget']:.1%} | {p['threshold']:.8g} | {m['recall']:.2%} | {m['benign_fpr']:.2%} | {c['tp']} | {c['fp']} |")
-    lines+=['','The validation subset has only 256 original benign examples, plus eight synthetic benign examples in the mixed population. One false alarm therefore changes its empirical rate by about 0.4 percentage points. These budgets are noisy estimates, not deployment guarantees.','','Scores and provenance are cached locally so this sweep can be reproduced without rerunning inference. The comparison JSON also includes a common fixed baseline threshold to separate score movement from threshold reselection. A common numerical threshold does not imply calibrated probabilities.','','The small quotation challenge was already inspected during the pilot. Use independently authored development/challenge material and repeated seeds before generalization claims.']
-    write_json('docs/threshold-analysis.json',report)
-    Path('docs/threshold-analysis.md').write_text('\n'.join(lines)+'\n')
-    print('Saved docs/threshold-analysis.md and .json',flush=True)
+    write_json("docs/threshold-analysis.json",report)
+    write_compact_report("threshold-analysis")
+    print('Saved compact threshold report and measured JSON',flush=True)
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--device',default='mps');run(parser.parse_args().device)

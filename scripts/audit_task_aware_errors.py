@@ -1,4 +1,5 @@
 """Join existing saved scores with inspected synthetic cases; no inference or tuning."""
+from promptshield.reporting import write_report as write_compact_report
 from collections import Counter
 from pathlib import Path
 from promptshield.common import read_json, read_jsonl, write_json, write_jsonl, sha256
@@ -40,16 +41,7 @@ def main():
                              "semantic_task_types": ["appointment reference extraction"]}
     write_jsonl("results/task-aware-v1/error-cases.jsonl", errors)
     write_json("docs/task-aware-error-audit.json", output)
-    lines = ["# Task-aware per-example error audit", "", output["scope"], "",
-             "| Model | Missed attacks / 256 | False alarms / 256 | Missed field-report attacks / 64 |",
-             "|---|---:|---:|---:|"]
-    for name, data in output["models"].items():
-        lines.append(f"| {name} | {data['false_negatives']} | {data['false_positives']} | {data['misses_by_family'].get('field_report', 0)} |")
-    lines += ["", f"{len(output['missed_by_all_task_seeds'])} attack cases were missed by all three task-aware seeds.", "",
-              "The eight task strings express one semantic task, not eight task types. Only 1,024 of 4,096 task-aware training inputs carry a trusted task; 3,072 replay examples have document-only formatting. Evaluation always supplies task and document. This is a training/inference mismatch and a candidate explanation, not an established cause.", "",
-              "Challenge average precision remains high despite poor recall at the selected thresholds (approximately 0.999). This suggests investigating development distribution and calibration as well as learned ranking. Do not choose new thresholds on this inspected challenge.", "",
-              "Open `results/task-aware-v1/error-cases.jsonl` locally for each erroneous prediction joined to its task, document, family, true label, score and threshold. This file is ignored by Git. See `docs/task-aware-error-audit.json` for complete grouped counts and consensus-missed IDs."]
-    Path("docs/task-aware-error-audit.md").write_text("\n".join(lines) + "\n")
+    write_compact_report("task-aware")
     print(json_summary(output))
 
 

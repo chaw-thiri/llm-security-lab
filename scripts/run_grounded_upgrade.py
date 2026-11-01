@@ -1,4 +1,6 @@
 """Matched continuation, development-only calibration/replication, then frozen evaluation."""
+from promptshield.provenance import frozen_protocol_sha256
+from promptshield.reporting import write_report as write_compact_report
 from collections import Counter
 import json
 import os
@@ -143,27 +145,21 @@ def evaluate(manifest,baseline,runs):
         write_json(OUT/"classification-results.json",report)
         print(name,"FRESH",result["fresh"]["metrics"],flush=True)
     write_json("docs/grounded-upgrade-results.json",report)
-    lines=["# Grounded document-only upgrade — measured results","",report["scope"],"",
-           "No frozen baseline, earlier results, human-review labels or default application checkpoint were overwritten. Thresholds were selected on development only, before the fresh evaluation. The original test and prior 30-source application study are regression references; source exposure is recorded explicitly.","",
-           "| Model | Fresh attack recall | Fresh benign FPR | Original regression recall | Original regression F1 | Prior real QA / 30 | Prior real hijacks / 270 |",
-           "|---|---:|---:|---:|---:|---:|---:|"]
-    for name,m in report["models"].items():
-        f,o,a=m["fresh"]["metrics"],m["original_regression"]["metrics"],m["exposed_real_application_replay"]
-        lines.append(f"| {name} | {f['recall']:.1%} | {f['benign_fpr']:.1%} | {o['recall']:.1%} | {o['f1']:.1%} | {a['benign_qa_completed']} | {a['marker_hijacks']} |")
-    lines += ["","The fresh evaluation has 18 public source pages, 36 clean passages, 36 authored descriptive-quotation controls, and 432 active attack copies. Correlated variants are not independent documents. Full per-domain counts, clean-versus-quotation false alarms, thresholds and checkpoint hashes are in the JSON record.","",
-              "Construction labels are not independent human judgments. These new pages come from the same publishers as development material and cannot demonstrate publisher-independent robustness. High scores on these controlled attacks are not proof of resistance to adaptive attacks. The 512-token complete-document limitation remains unchanged.","",
-              "The original validation, old synthetic challenges, NotInject and old real-document study have already been inspected. The separate external-tasks-v2 reserved challenge was not opened. Only development metrics selected thresholds and the replication decision; all attempted runs are reported. See [the fixed protocol](grounded-upgrade-protocol.md)."]
-    Path("docs/grounded-upgrade-results.md").write_text("\n".join(lines)+"\n")
+    write_compact_report("grounded-upgrade")
     write_json(OUT/"status.json",{"status":"complete","models":list(report["models"]),"default_checkpoint_changed":False})
 
 
 def main():
+    if (OUT/"status.json").exists() and read_json(OUT/"status.json")["status"] == "complete":
+        write_compact_report("grounded-upgrade")
+        print("Completed study: regenerated compact report only; no training or diary overwrite",flush=True)
+        return
     (Path.cwd()/".tmp").mkdir(exist_ok=True)
     os.environ["TMPDIR"]=str((Path.cwd()/".tmp").resolve())
     os.environ["PYTHONDONTWRITEBYTECODE"]="1"
     OUT.mkdir(parents=True,exist_ok=True)
     manifest=read_json(DATA/"manifest.json")
-    if sha256("docs/grounded-upgrade-protocol.md")!=manifest["protocol_sha256"]:
+    if frozen_protocol_sha256("docs/grounded-upgrade-protocol.md")!=manifest["protocol_sha256"]:
         raise ValueError("Protocol changed after data freeze")
     development=read_jsonl(DATA/"development.jsonl")
     if sha256(DATA/"development.jsonl")!=manifest["hashes"]["development.jsonl"]:

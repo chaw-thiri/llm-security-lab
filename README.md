@@ -1,25 +1,27 @@
 # PromptShield
 
-**A research project on training transformer-based detectors for prompt injection and measuring their effect on a local LLM application.**
+**Transformer training and evaluation for prompt-injection detection in a local LLM application.**
 
-PromptShield fine-tunes DistilBERT to classify document text as benign or injection, then uses the detector as a gate before Llama 3.2 3B through Ollama. The project studies both detection metrics and whether users can still complete ordinary tasks.
+PromptShield fine-tunes DistilBERT to classify untrusted documents, then gates access to Llama 3.2 3B through Ollama. The research measures attack detection, benign false alarms and useful task completion together.
 
-## Status
+## Current assessment
 
-PromptShield is an experimental research prototype. The saved `baseline-v1` remains the reference. [Public-document validation](docs/real-document-results.md) found substantial security/utility trade-offs and document-length limitations; current results do not support a dependable-defense claim. See the [research diary](research_diary.md) for experiment decisions and findings.
+This is an experimental research prototype. The latest three-seed consistency-loss study increased attack recall from **34.4% to 68.1%**, but benign false alarms rose from **4.6% to 11.9%** on its constructed public-document challenge. The development false-alarm cap did not transfer. The preserved `baseline-v1` remains the reference; the results do not support a dependable-defense claim.
 
-## Pipeline
+The [research diary](research_diary.md) is the detailed account of methods, decisions, unsuccessful results and limitations. Each report below combines its design and measured outcome in a compact supervisor-facing record.
+
+## Architecture
 
 ```text
-Untrusted document -> DistilBERT detector -> allow or block
-Allowed document + trusted task -> Llama 3.2 3B (Ollama) -> response
+Untrusted document -> DistilBERT classifier -> allow or block
+Allowed document + trusted task -> Llama 3.2 3B -> response
 ```
 
-The baseline detector classifies the document alone. Llama is not fine-tuned. The application fails closed when a document exceeds the detector's inspected 512-token context.
+DistilBERT is trained; Llama is not fine-tuned. The application rejects documents beyond its inspected 512-token context. Studies separate model learning from threshold changes and preserve controls and per-example errors.
 
 ## Reproduce the baseline
 
-The recorded environment is Python 3.14 on macOS arm64. See [runtime details](docs/runtime-environment.json) before reproducing on another platform.
+The recorded environment is Python 3.14 on macOS arm64; consult [runtime details](docs/runtime-environment.json) for other platforms. These commands reproduce the historical baseline tag:
 
 ```bash
 git clone https://github.com/chaw-thiri/llm-security-lab.git
@@ -31,50 +33,37 @@ python -m pip install -r requirements-baseline.txt
 python -m pip install --no-build-isolation --no-deps -e .
 python -m promptshield.acquire --baseline docs/baselines/v1.json
 python -m promptshield.data
-```
-
-Install Ollama and pull `llama3.2:3b` for the full application study. Then run:
-
-```bash
 python scripts/run_study.py
 ```
 
-The runner trains the full, frozen, and masked-mean recipes, evaluates the fixed test split, and runs the Ollama demonstration. To run the offline unit suite:
+The application study also requires Ollama with `llama3.2:3b`. A fresh clone contains neither downloaded data nor model weights. Later experiment settings and artifact requirements are documented in the diary and [contribution guide](contribution.md).
 
-```bash
-python -m unittest discover -s tests -p 'test_*.py' -v
-```
+## Research reports
 
-Reproduction downloads are stored locally. A fresh clone does not contain the trained weights or raw datasets. Seeds and hardware differences can change results.
-
-## Repository guide
-
-| Location | Contents |
+| Study | Assessment |
 |---|---|
-| `src/promptshield/` | Model, training loop, data handling, evaluation, and application gate |
-| `configs/` | Declared baseline and follow-up experiment settings |
-| `scripts/` | Study runners, preparation, and integrity checks |
-| `tests/` | Offline unit tests |
-| `docs/` | Protocols, data provenance, and detailed result records |
-| [`research_diary.md`](research_diary.md) | Chronological experiment decisions and findings |
+| [Baseline](docs/baseline-report.md) | Strong original-split F1; benign quotation failures |
+| [Contextual pilot](docs/context-pilot-report.md) | Targeted continuation did not outperform control |
+| [Contextual v2](docs/context-v2-report.md) | Authored challenge improved; ranking added little |
+| [NotInject](docs/notinject-evaluation.md) | External benign-trigger false alarms remained high |
+| [Task-aware study](docs/task-aware-report.md) | Missed attacks and a training-format mismatch |
+| [External data candidates](docs/external-tasks-v2.md) | Human review remains pending |
+| [Threshold analysis](docs/threshold-analysis.md) · [detector diagnostic](docs/detector-diagnostic.md) | Source-generalization failure exceeds calibration alone |
+| [Public-document validation](docs/real-document-report.md) | Security/utility and full-document targets failed |
+| [Grounded continuation](docs/grounded-upgrade-report.md) | Ranking improved; thresholds failed to transfer |
+| [Domain scoring](docs/domain-scoring-report.md) | Wording shortcuts and context-dependent offsets |
+| [Consistency-loss ablation](docs/context-consistency-report.md) | Recall improved; false alarms prevent promotion |
 
-## Baseline snapshot
+## Repository and validation
 
-The baseline tag, manifest, and local checkpoint snapshot are separate from later experiments. Verify the local snapshot with:
+`src/promptshield/` contains model/training/application code; `configs/` declares experiments; `scripts/` runs studies and audits; `tests/` holds offline checks. `docs/` contains compact reports, measured JSON and immutable provenance. Detailed research narrative belongs in the diary.
 
 ```bash
+python -m unittest discover -s tests -p 'test_*.py'
 python scripts/verify_baseline.py
+python scripts/render_reports.py --check
 ```
 
-Git does not contain the ignored model weights or datasets. Details are in the [baseline experiment record](docs/experiment-results.json).
+Report rendering reads saved JSON without training, inference or downloads. Historical protocol text and hashes remain in [provenance records](docs/provenance/frozen-protocols.json). Downloaded corpora, checkpoints, response logs and private notes remain outside Git.
 
-## Research records
-
-- [Baseline protocol and results](docs/experiment-results.json)
-- [Contextual training protocol and results](docs/context-v2-protocol.md) · [results](docs/context-v2-results.md)
-- [External NotInject false-alarm evaluation](docs/notinject-evaluation.md)
-- [Task-aware detector protocol and results](docs/task-aware-protocol.md) · [results](docs/task-aware-results.md)
-- [Real-document validation](docs/real-document-results.md) · [experimental v0.1.0 release draft](docs/v0.1.0-release-notes.md)
-- [Grounded real-context continuation](docs/grounded-upgrade-protocol.md) · [results](docs/grounded-upgrade-results.md) · [domain scoring investigation](docs/domain-scoring-investigation.md)
-
-Raw third-party datasets are not redistributed. See [PIGuard](https://github.com/leolee99/PIGuard), the [DistilBERT model](https://huggingface.co/distilbert/distilbert-base-uncased), and the [Ollama API](https://docs.ollama.com/api/generate) for upstream sources.
+Upstream: [PIGuard](https://github.com/leolee99/PIGuard), [DistilBERT](https://huggingface.co/distilbert/distilbert-base-uncased), [Ollama](https://docs.ollama.com/api/generate). Review standards: [contribution.md](contribution.md).

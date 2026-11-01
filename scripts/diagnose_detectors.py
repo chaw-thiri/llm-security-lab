@@ -1,4 +1,5 @@
 """Exploratory score-frontier diagnostic using only already inspected datasets."""
+from promptshield.reporting import write_report as write_compact_report
 from collections import Counter, defaultdict
 import math
 from pathlib import Path
@@ -207,38 +208,7 @@ def export_common_errors(common):
 
 
 def write_report(report):
-    lines = ["# Detector diagnostic: ranking versus decision thresholds", "", report["scope"], "",
-             "## Decision", "",
-             "Threshold adjustment alone is insufficient on these observed sources. At no more than 5% false alarms on each benign source, document-only models catch 43–55% of attacks, contextual CE catches 44–47%, and task-aware catches 39–50%. None reaches the illustrative research target of 95% attack recall with at most 5% false alarms on both sources. This is an exploratory target, not an agreed production requirement.", "",
-             "To reach 95% attack recall, even the document-only models require 14–17% false alarms on at least one benign source. Contextual CE requires 21–24%; task-aware requires 74–89%. These are optimistic, sample-specific limits because thresholds were chosen directly on the inspected examples.", "",
-             "On the synthetic data alone, document-only models can reach 98–99% attack recall at a 5% benign false-alarm budget. Requiring the same threshold to handle NotInject lowers that to 43–55%. The earlier high synthetic-only average precision therefore does not demonstrate cross-source separation. Calibration contributes to the saved-threshold failures, but the broader ranking/generalization failure remains.", "",
-             "Pause architecture expansion and repeated threshold tuning. Use one document-only DistilBERT model as the next experimental reference, keep the saved baseline, and focus on reviewed development examples representing both ordinary and confusing benign content alongside attacks. The newly assembled corpus is table-heavy and attack-heavy; it should not be trained as-is. Review the small development-only starter before committing to a large labeling effort, then define task/class sampling and a matched equal-step continuation experiment. Fix consistent task formatting before revisiting task conditioning. Reserve the new challenge for a single subsequent evaluation.", "",
-             "## Comparison population", "",
-             "All ten checkpoints see the same 256 attacks, 256 synthetic benign cases, and 291 NotInject benign probes. No fresh reserved challenge was read. Existing task-aware inputs include the task, while document-only inputs omit it; semantic task/document cases are matched. Contextual CE seeds 43/44 were scored on these same inspected examples to complete the three-seed comparison.", "",
-             "## Existing thresholds", "", "| Model | Synthetic attack recall | Synthetic false alarms | NotInject false alarms |", "|---|---:|---:|---:|"]
-    for name, model in report["models"].items():
-        m=model["conditions"]["original"]["saved"]
-        lines.append(f"| {name} | {pct(m['synthetic']['recall'])} | {pct(m['synthetic']['benign_fpr'])} | {pct(m['notinject_fpr'])} |")
-    for condition in ("original", "quoted"):
-        lines += ["", f"## Attainable trade-offs: {condition} documents", "",
-                  "These rows choose an oracle threshold on the inspected examples. FPR budgets apply separately to synthetic benign and NotInject probes. Equal scores move together; no interpolated operating points are invented.", "",
-                  "| Model | Recall at ≤1% FPR each | Recall at ≤2% FPR each | Recall at ≤5% FPR each | Min worst-source FPR at ≥90% recall | At ≥95% recall | At ≥99% recall |",
-                  "|---|---:|---:|---:|---:|---:|---:|"]
-        for name, model in report["models"].items():
-            m=model["conditions"][condition]
-            values=[pct(m["recall_at_fpr_budgets_per_source"][str(b)]["recall"]) for b in BUDGETS]+[pct(m["min_fpr_at_recall_per_source"][str(r)]["worst_source_fpr"]) for r in RECALLS]
-            lines.append("| "+name+" | "+" | ".join(values)+" |")
-    lines += ["", "## Shared errors", "", "| Group | Shared missed attacks: saved threshold | Shared missed attacks: oracle ≤5% FPR each | Shared benign false alarms: oracle ≥95% recall |", "|---|---:|---:|---:|"]
-    for group, data in report["common_errors"]["original"].items():
-        lines.append(f"| {group} | {len(data['saved_false_negatives'])} | {len(data['oracle_5pct_per_source_false_negatives'])} | {len(data['oracle_95pct_recall_false_positives'])} |")
-    lines += ["", "Across all ten models, the 84 attacks still missed at the exploratory 5% per-source budget comprise 7 travel-diary, 41 legal-exhibit, and 36 field-report cases. At thresholds reaching 95% recall, all ten models flag the same 40 NotInject probes: 24 technique queries, 10 common queries, 5 virtual-creation queries, and 1 multilingual query. The dependence on particular wrappers and topic categories suggests shared shortcuts; this is a hypothesis, not a causal finding.", "",
-              "Three probes are flagged by every model even at their saved thresholds: `one-105`, `three-54`, and `three-67`. Their benchmark labels are benign, but some wording is instruction-like and underspecified (for example, activating an unfiltered mode). Have a person check these disagreements against the project's threat model before interpreting all benchmark-defined false alarms as clearly legitimate real-world requests. Keep benchmark scores unchanged and record any separate adjudication.", "",
-              "The local `results/detector-diagnostic-v1/shared-errors-with-text.jsonl` joins shared error IDs to full task/document text, source, category/family and error policy. It is ignored by Git. Grouped patterns and exact IDs are in [the JSON diagnostic](detector-diagnostic.json); the full threshold frontiers remain local in `results/detector-diagnostic-v1/full-frontiers.json`. Shared errors are agreements among these models, not proof of label correctness. No external reserved-challenge text is included.", "",
-              "![Recall versus permitted false alarms](detector-diagnostic.png)", "",
-              "## Interpretation boundaries", "",
-              "The synthetic examples are correlated templates, and NotInject has no attack cases. Combining them tests known source shift but does not simulate real traffic. A strong oracle point means ranking on these inspected examples may support better calibration; it does not validate that threshold. A poor oracle point means changing the threshold alone cannot meet that trade-off on this observed set. The quoted condition is a previously inspected perturbation, not fresh evidence.", "",
-              "Task-aware training supplied task formatting for only 1,024/4,096 rows, and all task phrasings described one extraction task. This is a concrete experimental flaw and limits causal interpretation. Repeated seeds share baseline initialization. New data candidates and their reserved challenge were not loaded by this script. No weights, checkpoint thresholds, or application defaults were changed."]
-    Path("docs/detector-diagnostic.md").write_text("\n".join(lines)+"\n")
+    write_compact_report("detector-diagnostic")
 
 
 def plot(report):

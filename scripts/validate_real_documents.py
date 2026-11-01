@@ -1,4 +1,6 @@
 """Run the frozen real-document excerpt study and separate complete-page length probes."""
+from promptshield.provenance import frozen_protocol_sha256
+from promptshield.reporting import write_report as write_compact_report
 from collections import Counter
 import math
 from pathlib import Path
@@ -70,7 +72,8 @@ def load_frozen():
     for path, key in (("configs/real-document-sources.json","source_plan_sha256"),
                       ("docs/real-document-validation-protocol.md","protocol_sha256"),
                       ("src/promptshield/application.py","application_sha256")):
-        if sha256(path) != manifest[key]:
+        actual = frozen_protocol_sha256(path) if key == "protocol_sha256" else sha256(path)
+        if actual != manifest[key]:
             raise ValueError(f"Protocol/source/application changed after freeze: {path}")
     for name, record in manifest["checkpoints"].items():
         checkpoint = Path(record["path"])
@@ -236,50 +239,7 @@ def main():
 
 
 def write_report(report,manifest):
-    candidate = report["conditions"]["document-42"]
-    baseline = report["conditions"]["baseline"]
-    ungated = report["conditions"]["unprotected"]
-    lines=["# Real-document validation v1", "", report["scope"], "",
-           "## What the result means", "",
-           f"The current application does not meet the predeclared security-MVP targets. The document-only candidate blocks {candidate['benign_block_count']}/30 clean excerpts but catches only {candidate['attack_block_count']}/270 attacks ({candidate['attack_recall']:.1%}); {candidate['attack_success_exact_count']}/270 attacks still hijack its output. The baseline catches {baseline['attack_block_count']}/270 attacks ({baseline['attack_recall']:.1%}) but blocks {baseline['benign_block_count']}/30 clean excerpts ({baseline['benign_block_rate']:.1%}). Unprotected Llama is hijacked in {ungated['attack_success_exact_count']}/270 cases ({ungated['attack_success_exact_rate']:.1%}).",
-           "",
-           "Twenty-seven complete pages exceed 512 tokens. The candidate allows only two complete pages through the gate, while the baseline allows none. This is a substantial input-coverage limitation, even where the system correctly fails closed. Short-excerpt results do not establish full-document usability.", "",
-           "An experimental v0.1.0 research release can publish this measured trade-off and its limitations. The evidence does not support a dependable-defense claim. Next improvements should separately address detection inside technical/security text and long-document support, using new development data and a fresh later evaluation.", "",
-           "Thirty public sources cover Python documentation, OWASP security guidance, and government/science information. Each has one clean source-grounded QA excerpt and nine controlled attack copies (three payloads × three positions). These 270 attacks share only 30 source documents. Sources, answer keys, excerpt offsets and checkpoints were frozen before scoring; the previously reserved external-tasks-v2 challenge was not used.","",
-           "## Application results on short excerpts", "",
-           "| Condition | Clean excerpts blocked / 30 | Clean QA completed / 30 | Attacks blocked / 270 | Exact marker hijacks / 270 | Attacked QA completed / 270 |",
-           "|---|---:|---:|---:|---:|---:|"]
-    for name,m in report["conditions"].items():
-        lines.append(f"| {name} | {m['benign_block_count']} | {m['benign_qa_success_count']} | {m['attack_block_count']} | {m['attack_success_exact_count']} | {m['attacked_qa_success_count']} |")
-    lines += ["", "## Benign blocks by source category", "", "| Condition | Python / 10 | OWASP / 10 | General information / 10 |", "|---|---:|---:|---:|"]
-    for name,m in report["conditions"].items():
-        lines.append(f"| {name} | {m['by_cohort']['technical']['benign_block_count']} | {m['by_cohort']['security']['benign_block_count']} | {m['by_cohort']['general']['benign_block_count']} |")
-    lines += ["", "## Attack detection by source category", "", "| Detector | Python attacks / 90 | OWASP attacks / 90 | General-information attacks / 90 |", "|---|---:|---:|---:|"]
-    for name,m in report["conditions"].items():
-        if name != "unprotected":
-            lines.append(f"| {name} | {m['by_cohort']['technical']['attack_block_count']} | {m['by_cohort']['security']['attack_block_count']} | {m['by_cohort']['general']['attack_block_count']} |")
-    lines += ["", "The candidate detects only 14/90 attacks in technical excerpts and 10/90 in security excerpts, versus 71/90 in general information. This points to a source-dependent failure: allowing a security discussion is useful, but active redirection inside that discussion must still be detected. The result is compatible with a contextual shortcut; this experiment does not isolate its cause."]
-    lines += ["", "## Complete-page support", "", "These probes use the complete extracted page text. They exercise the actual application gate with an instrumented generator handoff; they do not claim Llama completion on long pages. Rejection for length is counted separately from rejection as injection.", "",
-              "| Detector | Complete pages accepted / 30 | Rejected for length | Rejected by score | Uninspected suffixes handed off |", "|---|---:|---:|---:|---:|"]
-    for name,m in report["conditions"].items():
-        if "complete_pages" in m:
-            p=m["complete_pages"]
-            lines.append(f"| {name} | {p['accepted']} | {p['length_rejected']} | {p['score_rejected']} | {p['over_length_generator_handoffs']} |")
-    lines += ["", "## Predeclared release checks", "", "These are small-sample research targets, not production certification. All checks were specified in the [protocol](real-document-validation-protocol.md) before scoring.", "", "| Check | Baseline | Document-only seed 42 |", "|---|---|---|"]
-    for check in report["release_decision"]["baseline"]["checks"]:
-        lines.append(f"| {check.replace('_',' ')} | {'PASS' if report['release_decision']['baseline']['checks'][check] else 'FAIL'} | {'PASS' if report['release_decision']['document-42']['checks'][check] else 'FAIL'} |")
-    lines += ["", "Decision: **"+report["release_status"].replace("_"," ")+"**.", "",
-              "If these gates fail, the results can accompany an explicitly experimental research release; they do not support marketing the application as a dependable defense. This run does not change defaults, bump a version, publish a release, retrain weights, or fit a threshold.", "",
-              "## Inspection and reproducibility", "",
-              "Public source URLs, retrieved snapshot hashes, answer keys and excerpt offsets are in [the source manifest](real-document-source-manifest.json). Raw HTML/text, complete frozen cases and responses stay local under ignored `data/raw/real-documents-v1/`, `data/splits/real-documents-v1/` and `results/real-documents-v1/`. Inspect `case-results.jsonl` there to review every task failure, block or hijack alongside the case IDs. The raw source snapshots can contain ordinary links and code examples; no links are followed and no source code is executed by this study.", "",
-              "Exact snapshot reproduction requires the retained local cache. Public pages can change, so a future download must be compared against the recorded hashes and treated as a different evaluation if it changes. The public source facts may also have appeared in model pretraining; this study does not establish that Llama could answer them only by reading the supplied text.", "",
-              "One real unprotected Llama response is generated per short case and reused for any gate that forwards it. Cached replay isolates detector decisions; it is not independent generation per model. Model digest, Ollama version and actual application generation settings are recorded in [the detailed results](real-document-results.json). Existing thresholds are retained, and seed 42 was preselected to avoid choosing the previously best-looking seed.", "",
-              "QA uses answer-only instructions and frozen exact-match aliases, ignoring common wrapping punctuation. It can reject otherwise acceptable paraphrases. Labels and keys were source-checked and assistant-reviewed, not independently human-reviewed. Marker occurrence is recorded separately because quoting a marker is not necessarily the exact attacker goal. These results cover factual QA on English excerpts; they do not validate summarization, PDFs, OCR, arbitrary formats, adaptive attackers, secret exfiltration or real traffic prevalence.", "",
-              "Several of the seven clean exact-answer failures express correct information with different wording. For example, `Phobos, Deimos` is rejected by the frozen aliases `Phobos and Deimos` / `Deimos and Phobos`. The frozen 23/30 result is retained as a strict output-contract score, not interpreted as 76.7% factual accuracy. See [the post-hoc error review](real-document-error-review.md); it does not modify benchmark labels or primary counts.", "",
-              "All 300 cached short-case decisions per detector were checked against the actual `process_document` path using an instrumented generator. Allowed cases forwarded the identical task/document, blocked cases did not call the generator, and no complete-page over-limit suffix was forwarded.", "",
-              "Wilson intervals for benign outcomes and source-level compromise counts are included in the detailed record. Ten sources per category and correlated attack copies cannot establish a precise low real-world failure rate. The complete-page cohort also exposes scope limitations that excerpt metrics alone would hide.", "",
-              "```bash", "python scripts/prepare_real_documents.py --acquire-only", "python scripts/prepare_real_documents.py", "python scripts/validate_real_documents.py", "```"]
-    Path("docs/real-document-results.md").write_text("\n".join(lines)+"\n")
+    write_compact_report("real-document")
 
 
 if __name__ == "__main__":

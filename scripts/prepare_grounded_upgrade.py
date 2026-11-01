@@ -1,4 +1,5 @@
 """Prepare balanced, source-separated real-context continuation and a fresh challenge."""
+from promptshield.provenance import frozen_protocol_sha256
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
@@ -212,7 +213,7 @@ def main():
                           initial_checkpoint=INITIAL,initial_weights_sha256=INITIAL_SHA)
             write_json(f"configs/grounded-upgrade-{arm}-{seed}.json",config)
     manifest={"status":"frozen_before_training", "initial_weights_sha256":INITIAL_SHA,
-              "protocol_sha256":sha256("docs/grounded-upgrade-protocol.md"),"source_partition":partition,
+              "protocol_sha256":frozen_protocol_sha256("docs/grounded-upgrade-protocol.md"),"source_partition":partition,
               "fresh_source_plan_sha256":sha256("configs/grounded-upgrade-sources.json"),"fresh_sources":acquired,
               "counts":{"rows_per_arm":4096,"original_replay":1536,"real_context_pairs":1280,
                         "development_rows":1024,"fresh_rows":len(fresh),"fresh_sources":len(specs)},

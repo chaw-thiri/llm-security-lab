@@ -1,4 +1,6 @@
 """Post-hoc domain diagnostic; never fits a serving policy or reads reserved data."""
+from promptshield.provenance import frozen_protocol_sha256
+from promptshield.reporting import write_report as write_compact_report
 import argparse
 import hashlib
 import math
@@ -186,7 +188,7 @@ def score_probes(entry, rows):
     from promptshield.data import TextDataset, Collator
     weight_hash = entry["weights_sha256"]
     provenance = {"weights_sha256": weight_hash, "probe_sha256": sha256(OUT/"controlled-probes.jsonl"),
-                  "protocol_sha256": sha256("docs/domain-scoring-protocol.md"), "batch_size": 8,
+                  "protocol_sha256": frozen_protocol_sha256("docs/domain-scoring-protocol.md"), "batch_size": 8,
                   "input": "document only, no metadata; full probe <=512 tokens"}
     path = OUT/f"probes-{weight_hash[:16]}.json"
     if path.exists():
@@ -235,85 +237,7 @@ def summarize_probes(scores, cases, threshold):
 
 
 def write_report(report):
-    g = report["models"]["grounded-42"]
-    probe_groups = {(p["context_split"], p["domain"], p["payload_split"], p["condition"]): p
-                    for p in report["probes"]["grounded-42"]}
-    def probe(domain, condition):
-        return probe_groups[("fresh", domain, "validation", condition)]
-    mars = g["development_sources"]["nasa-mars"]["benign_by_kind"]
-    moon = g["development_sources"]["nasa-moon"]["benign_by_kind"]
-    tech, security = (g["matched_fresh_controls"][d] for d in ("technical", "security"))
-    global_mean = np.mean([report["models"][f"grounded-{s}"]["fresh"]["oracle_global_5pct_each_domain"]["recall"] for s in (42, 43, 44)])
-    local_mean = np.mean([report["models"][f"grounded-{s}"]["fresh"]["oracle_domain_routed_recall"] for s in (42, 43, 44)])
-    lines = ["# Domain-dependent scoring investigation", "", report["scope"], "",
-             "No training, serving threshold, checkpoint weights, application default or reserved human-review challenge was changed. All oracle values below are optimistic diagnostics selected on already measured cases, not proposed deployment settings.", "",
-             "## Findings in plain language", "",
-             "The failure combines **dependence on familiar benign wording, context-dependent score offsets, and incomplete separation**. The upgraded model learned a useful signal, but its score is not a stable measure of risk across source contexts and ways of describing an instruction. This is more specific than saying all technical text is treated as safe.", "",
-             f"1. **Ordinary NASA text is not the main trigger.** In seed 42, clean Mars and Moon development passages have median scores of {mars['clean']['median']:.6f} and {moon['clean']['median']:.6f}. Benign descriptions of attacks in these sources have medians of {mars['descriptive_example']['median']:.6f} and {moon['descriptive_example']['median']:.6f}. The upper tail of these descriptive examples makes the general-domain constraint drive the very high shared threshold in all three upgraded seeds.", "",
-             f"2. **Familiar wording acts like a strong benign cue.** With the same inner instructions and contexts in the controlled probe, the training description produces extremely low scores, while unseen descriptions often produce high scores. For seed 42 on general challenge contexts and development-worded inner instructions, the median score is {probe('general', 'descriptive_train')['scores']['median']:.6f} for the training wrapper versus {probe('general', 'descriptive_validation')['scores']['median']:.6f} for the development wrapper. Native median logit margins are {probe('general', 'descriptive_train')['logit_margin']['median']:.2f} and {probe('general', 'descriptive_validation')['logit_margin']['median']:+.2f}. This supports a wording shortcut; it is not proof of a particular attention mechanism or a claim that arbitrary attack text becomes safe when wrapped.", "",
-             f"3. **Identical commands receive different scores in different contexts.** On the measured-challenge passages with identical development-worded active instructions appended at the end, seed 42 median scores are {probe('technical', 'active')['scores']['median']:.6f} in technical text, {probe('security', 'active')['scores']['median']:.6f} in security text and {probe('general', 'active')['scores']['median']:.6f} in general text. All three upgraded seeds show the same ordering. These probes remove inner wording, marker and insertion-position changes from that comparison, although passage content and length still vary.", "",
-             f"4. **The shared threshold suppresses learned distinctions.** Seed 42 scores {security['above_own_clean']}/{security['attacks']} security attacks above their own clean controls and {security['above_own_quotation']}/{security['attacks']} above their own descriptive controls, yet blocks only {g['fresh']['domains']['security']['fixed']['confusion_matrix']['tp']} at the saved threshold. Technical attacks outrank their own clean controls in {tech['above_own_clean']}/{tech['attacks']} cases; {tech['missed_despite_outranking_both_controls']} still miss the threshold despite outranking both controls. Comparing each attack only with its own clean passage is easier than choosing one threshold across every benign passage.", "",
-             f"5. **A threshold change alone cannot reach the intended trade-off.** Even selecting thresholds directly on the inspected challenge gives mean recall of {global_mean:.1%} with one common threshold versus {local_mean:.1%} with separate oracle domain thresholds, each constrained to at most 5% benign FPR. These are optimistic empirical limits. Separately fitted development-domain thresholds transfer to only 31.2–42.4% recall on these measured cases. Neither approach validates a replacement defense.", "",
-             "## What the saved scores show", "",
-             "| Model | Fresh recall at saved threshold | Fresh ROC-AUC | Oracle shared threshold, ≤5% FPR each domain | Oracle separate domain thresholds, ≤5% each | Development-only domain thresholds applied to fresh |",
-             "|---|---:|---:|---:|---:|---:|"]
-    for name, entry in report["models"].items():
-        f = entry["fresh"]
-        lines.append(f"| {name} | {f['fixed']['recall']:.1%} | {f['fixed']['roc_auc']:.3f} | {f['oracle_global_5pct_each_domain']['recall']:.1%} | {f['oracle_domain_routed_recall']:.1%} | {entry['development_domain_threshold_transfer']['fresh']['recall']:.1%} |")
-    m = report["models"]["grounded-42"]
-    lines += ["", "The first seed is the declared illustrative model, not the best model selected from this diagnostic. All other seeds are retained above. Some saved policies exceed 5% FPR in a challenge domain even when pooled FPR is below 5%; the constrained oracle can therefore have lower recall than that saved policy.", "",
-              "## Where the threshold comes from — seed 42", "",
-              f"The saved shared threshold is **{m['saved_threshold']:.10f}**. The 5% requirement applies to each development domain separately. A domain with unusually high benign scores can therefore force a threshold above attacks from other domains.", "",
-              "| Domain | Development benign median | Development attack median | Fresh benign median | Fresh attack median | Fresh within-domain ROC-AUC | Fresh recall at saved threshold |",
-              "|---|---:|---:|---:|---:|---:|---:|"]
-    for domain in DOMAINS:
-        d, f = m["development"]["domains"][domain], m["fresh"]["domains"][domain]
-        lines.append(f"| {domain} | {d['scores']['0']['median']:.6f} | {d['scores']['1']['median']:.6f} | {f['scores']['0']['median']:.6f} | {f['scores']['1']['median']:.6f} | {f['fixed']['roc_auc']:.3f} | {f['fixed']['recall']:.1%} |")
-    lines += ["", "![Development and measured challenge score distributions](domain-scoring-distributions.png)", "",
-              "Points show median saved probabilities on a log-odds scale, with 5th–95th percentile ranges. The line is the unchanged shared threshold. The original PIGuard development group also constrains calibration but is not drawn. The transform is for display; it does not alter decisions or reproduce native model logits."]
-    lines += ["", "Development source and benign-kind breakdown:", "",
-              "| Source | Clean benign median (n) | Descriptive-example benign median (n) | Benign FPR at saved threshold |",
-              "|---|---:|---:|---:|"]
-    for name, source in m["development_sources"].items():
-        cells = []
-        for kind in ("clean", "descriptive_example"):
-            stats = source["benign_by_kind"].get(kind)
-            cells.append(f"{stats['median']:.6f} ({stats['n']})" if stats else "—")
-        lines.append(f"| {name} | {' | '.join(cells)} | {source['fixed']['benign_fpr']:.1%} |")
-    lines += ["", "The 5% calibration cap applies to each broad domain, not to every individual source page. Mars' 3/48 false positives are compatible with 4/85 (4.7%) across the general development domain. Repeated constructed cases do not increase the number of independent source pages.", "",
-              "## Matched passage comparisons — seed 42", "",
-              "| Fresh domain | Attacks | Score above own clean passage | Above own descriptive quotation | Missed despite outranking both |",
-              "|---|---:|---:|---:|---:|"]
-    for domain, p in m["matched_fresh_controls"].items():
-        lines.append(f"| {domain} | {p['attacks']} | {p['above_own_clean']} | {p['above_own_quotation']} | {p['missed_despite_outranking_both_controls']} |")
-    lines += ["", "## Controlled context and wording probe", "",
-              "These are new post-hoc construction-labeled probes, not fresh validation. Two passages per development page and the already scored fresh passages receive identical markers and identical instruction strings, always appended at the end. Active instructions and three descriptive wrappers share the same inner text. Eight inner payloads cross four roles on 48 contexts, plus 48 clean controls: 1,584 probes per model. This controls insertion position and instruction wording when comparing contexts; it does not establish a linguistic cause or population performance.", "",
-              "The machine-readable report gives native logit margins, probability distributions and flagged counts by context partition, domain, payload wording and descriptive wrapper. Local full-text probes and predictions are under `results/domain-scoring-v1/`. Only public source snapshots are used.", "",
-              "Seed 42 controlled probe: median native attack-class minus benign-class logit margin. Higher means more attack-like; these values are not calibrated probabilities. Each cell aggregates four identical inner instructions across the indicated contexts.", "",
-              "| Context partition | Domain | Inner wording | Active | Training wrapper | Development wrapper | Challenge wrapper |",
-              "|---|---|---|---:|---:|---:|---:|"]
-    probe = report["probes"].get("grounded-42", [])
-    for split in ("development", "fresh"):
-        for domain in DOMAINS:
-            for wording in ("validation", "fresh"):
-                selected = {r["condition"]: r for r in probe if
-                            (r["context_split"], r["domain"], r["payload_split"]) == (split, domain, wording)}
-                if selected:
-                    values = [selected[c]["logit_margin"]["median"] for c in
-                              ("active", "descriptive_train", "descriptive_validation", "descriptive_fresh")]
-                    lines.append(f"| {split} | {domain} | {wording} | "+" | ".join(f"{v:.2f}" for v in values)+" |")
-    lines += ["",
-              "## Limits and next decision", "",
-              "Source pages, payload wording, wrapper phrasing and passage lengths changed together in the original challenge, so its score shift cannot be attributed entirely to topic. The controlled probe separates some of those factors. Domains are known metadata here; separate domain thresholds are an analysis aid, not a reliable routing system for arbitrary user documents. A single monotonic score rescaling cannot improve ROC-AUC or the attainable shared-threshold frontier.", "",
-              "There are only two development source pages per real domain and six previously fresh pages per domain. Repeated payload/position variants are correlated, and 24 benign cases per fresh domain permit only one false positive at a 5% budget. These empirical limits are not a statistical guarantee. Construction labels have not received independent human review. Once examined here, these challenge cases are regression material, never a new untouched test.", "",
-              "## Recommended next experiment", "",
-              "Do not spend another run merely extending training, repeating seeds or changing the final threshold. First review a small set of benign-description versus active-command contrasts across source contexts to check the intended role labels. Use existing public snapshots; a large new acquisition or cleaning project is not required for this step.", "",
-              "Then preregister one matched loss ablation: current cross-entropy versus cross-entropy plus a cross-context consistency objective on label-identical instruction roles. Keep original-data replay and the same training budget. Cross the same active and descriptive roles with multiple contexts, and hold out complete descriptive-wrapper families and source pages in development. This tests whether training can align scores across contexts while preserving the role distinction, rather than rewarding recognition of a few stock benign phrases. It is a hypothesis to test, not an established fix. Keep the full encoder/head architecture fixed so the comparison isolates the training change.", "",
-              "Before starting that experiment, specify per-domain development recall/FPR criteria and reserve genuinely new source pages and phrasing for its final evaluation. The investigated challenge can only be a regression reference. Do not apply oracle domain thresholds, introduce a keyword-based router, or promote a checkpoint based on this report.", "",
-              "## Reproduce", "",
-              "After completing the grounded study with its local data, checkpoints and score caches, run:", "", "```bash", "python scripts/investigate_domain_scoring.py --with-probes", "```", "",
-              "Inference is cached by frozen probe/protocol and checkpoint hashes. It needs the existing MPS environment and downloads nothing. The complete JSON record includes cross-domain AUC matrices, quantiles, source-level results, operating-point limits, development-domain transfer and provenance hashes. See [the diagnostic protocol](domain-scoring-protocol.md)."]
-    Path("docs/domain-scoring-investigation.md").write_text("\n".join(lines)+"\n")
+    write_compact_report("domain-scoring")
 
 
 def plot(report):
@@ -352,6 +276,10 @@ def main():
     parser.add_argument("--with-probes", action="store_true", required=True,
                         help="Required for the complete report: run/cache the fixed controlled inference; no training")
     args = parser.parse_args()
+    if (OUT/"status.json").exists() and read_json(OUT/"status.json")["status"] == "complete":
+        write_compact_report("domain-scoring")
+        print("Completed diagnostic: regenerated compact report only; no inference",flush=True)
+        return
     os.environ.setdefault("MPLCONFIGDIR", str(Path.cwd()/".tmp/matplotlib"))
     OUT.mkdir(parents=True, exist_ok=True)
     manifest = read_json(DATA/"manifest.json")
@@ -371,7 +299,7 @@ def main():
     cases["development"] = annotate_development(cases["development"])
     report = {"scope": "Exploratory investigation of already completed development/challenge results and controlled post-hoc public-text probes. No new generalization claim or tuned serving policy.",
               "provenance": {"study_sha256": sha256("docs/grounded-upgrade-results.json"), "case_hashes": hashes,
-                             "protocol_sha256": sha256("docs/domain-scoring-protocol.md"),
+                             "protocol_sha256": frozen_protocol_sha256("docs/domain-scoring-protocol.md"),
                              "analysis_script_sha256": sha256(__file__)},
               "models": {}, "probes": {}, "probe_clean": {}}
     for name in ("baseline-calibrated", "control-42", "control-43", "control-44", "grounded-42", "grounded-43", "grounded-44"):

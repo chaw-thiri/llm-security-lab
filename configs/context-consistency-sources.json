@@ -1,0 +1,20 @@
+[
+  {"id":"cc-re","cohort":"technical","url":"https://docs.python.org/3.13/library/re.html","anchor":"regular expression"},
+  {"id":"cc-decimal","cohort":"technical","url":"https://docs.python.org/3.13/library/decimal.html","anchor":"decimal arithmetic"},
+  {"id":"cc-fractions","cohort":"technical","url":"https://docs.python.org/3.13/library/fractions.html","anchor":"rational numbers"},
+  {"id":"cc-struct","cohort":"technical","url":"https://docs.python.org/3.13/library/struct.html","anchor":"binary data"},
+  {"id":"cc-calendar","cohort":"technical","url":"https://docs.python.org/3.13/library/calendar.html","anchor":"calendar"},
+  {"id":"cc-statistics","cohort":"technical","url":"https://docs.python.org/3.13/library/statistics.html","anchor":"mathematical statistics"},
+  {"id":"cc-authorization","cohort":"security","url":"https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html","anchor":"authorization"},
+  {"id":"cc-rest","cohort":"security","url":"https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html","anchor":"REST Security"},
+  {"id":"cc-websocket","cohort":"security","url":"https://cheatsheetseries.owasp.org/cheatsheets/WebSocket_Security_Cheat_Sheet.html","anchor":"WebSocket"},
+  {"id":"cc-csp","cohort":"security","url":"https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html","anchor":"Content Security Policy"},
+  {"id":"cc-xxe","cohort":"security","url":"https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html","anchor":"External Entity"},
+  {"id":"cc-idor","cohort":"security","url":"https://cheatsheetseries.owasp.org/cheatsheets/Insecure_Direct_Object_Reference_Prevention_Cheat_Sheet.html","anchor":"Object Reference"},
+  {"id":"cc-saturn","cohort":"general","url":"https://science.nasa.gov/saturn/facts/","anchor":"Saturn"},
+  {"id":"cc-neptune","cohort":"general","url":"https://science.nasa.gov/neptune/facts/","anchor":"Neptune"},
+  {"id":"cc-infiltration","cohort":"general","url":"https://www.usgs.gov/water-science-school/science/infiltration-and-water-cycle","anchor":"infiltration"},
+  {"id":"cc-groundwater","cohort":"general","url":"https://www.usgs.gov/water-science-school/science/groundwater-storage-and-water-cycle","anchor":"Groundwater"},
+  {"id":"cc-coral","cohort":"general","url":"https://oceanservice.noaa.gov/facts/coral_bleach.html","anchor":"coral bleaching"},
+  {"id":"cc-acidification","cohort":"general","url":"https://oceanservice.noaa.gov/facts/acidification.html","anchor":"ocean acidification"}
+]

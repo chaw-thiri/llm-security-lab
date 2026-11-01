@@ -111,11 +111,13 @@ class Collator:
 
     def __call__(self, features):
         labels = torch.tensor([r["labels"] for r in features], dtype=torch.long)
-        batch = self.tokenizer.pad([{k: v for k, v in r.items() if k not in ("labels", "pair_ids")} for r in features],
+        batch = self.tokenizer.pad([{k: v for k, v in r.items() if k not in ("labels", "pair_ids", "consistency_ids")} for r in features],
                                    padding=True, return_tensors="pt")
         batch["labels"] = labels
         if "pair_ids" in features[0]:
             batch["pair_ids"] = torch.tensor([r["pair_ids"] for r in features], dtype=torch.long)
+        if "consistency_ids" in features[0]:
+            batch["consistency_ids"] = torch.tensor([r["consistency_ids"] for r in features], dtype=torch.long)
         return batch
 
 

@@ -1,4 +1,5 @@
 """Freeze public-source document excerpts and full-page length probes before scoring."""
+from promptshield.provenance import frozen_protocol_sha256
 import argparse
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
@@ -190,7 +191,7 @@ def main():
         checkpoints[name] = {"path":path, "weights_sha256":sha256(Path(path)/"model.safetensors"),
                              "metadata_sha256":sha256(Path(path)/"detector.json"), "threshold":metadata["threshold"]}
     manifest = {"status":"frozen_before_scoring", "created_at":datetime.now(timezone.utc).isoformat(),
-                "source_plan_sha256":sha256(PLAN), "protocol_sha256":sha256(PROTOCOL),
+                "source_plan_sha256":sha256(PLAN), "protocol_sha256":frozen_protocol_sha256(PROTOCOL),
                 "application_sha256":sha256("src/promptshield/application.py"), "sources":records,
                 "counts":{"sources":30,"clean_excerpts":30,"controlled_attacks":270,"full_pages":30},
                 "max_excerpt_tokens":max(lengths), "checkpoints":checkpoints,

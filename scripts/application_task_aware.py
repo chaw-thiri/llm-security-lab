@@ -1,4 +1,5 @@
 """Replay a fixed 64-case Ollama response cache through task-aware and control gates."""
+from promptshield.reporting import write_report as write_compact_report
 from pathlib import Path
 
 import requests
@@ -82,6 +83,7 @@ def main():
         print(name, report["conditions"][name], flush=True)
         del detector
     write_json("docs/task-aware-application-results.json", report)
+    write_compact_report("task-aware")
     print("TASK-AWARE APPLICATION EVALUATION COMPLETE", flush=True)
 
 

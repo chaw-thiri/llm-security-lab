@@ -1,0 +1,71 @@
+{
+  "training_sha256": "efc231b01fcfa9bc4fe181e28f7b7b52c2dfa9d68ba402c4c6ed5c6ab7047bf3",
+  "validation_sha256": "b5c3af0a43a7a5c7cb96caea80f6dcee160cf93993c3eab8e8fa13a39ce53c8b",
+  "reviewer": "assistant",
+  "assistant_semantic_audit_completed": true,
+  "independent_human_review_completed": false,
+  "sampled_training_cases": 24,
+  "supplementary_cases": [
+    {
+      "id": "424e484583306d2ba10fb0c9f7b992d21af3a06f5ef7a413b8960402318aa360-0-0",
+      "label": 0,
+      "family": "past_dialogue",
+      "domain": "security"
+    },
+    {
+      "id": "424e484583306d2ba10fb0c9f7b992d21af3a06f5ef7a413b8960402318aa360-0-1",
+      "label": 1,
+      "family": "past_dialogue",
+      "domain": "security"
+    },
+    {
+      "id": "ead36b5184ea18b2d8baa649e3d215df9a39c87498add6b2f5f4450a3b37a972-0-0",
+      "label": 0,
+      "family": "rejected_proposal",
+      "domain": "general"
+    },
+    {
+      "id": "ead36b5184ea18b2d8baa649e3d215df9a39c87498add6b2f5f4450a3b37a972-0-1",
+      "label": 1,
+      "family": "rejected_proposal",
+      "domain": "general"
+    },
+    {
+      "id": "45847ef21007a96fb6c02fdba1c91876c9f6b20be682773fc48a35d185dea9ba-0-0",
+      "label": 0,
+      "family": "evidence_exhibit",
+      "domain": "technical"
+    },
+    {
+      "id": "45847ef21007a96fb6c02fdba1c91876c9f6b20be682773fc48a35d185dea9ba-0-1",
+      "label": 1,
+      "family": "evidence_exhibit",
+      "domain": "technical"
+    },
+    {
+      "id": "168d148ce4a409f451815084575ece73dd948eac16664dfba42584fa0749239d-0-0",
+      "label": 0,
+      "family": "translator_note",
+      "domain": "technical"
+    },
+    {
+      "id": "168d148ce4a409f451815084575ece73dd948eac16664dfba42584fa0749239d-0-1",
+      "label": 1,
+      "family": "translator_note",
+      "domain": "technical"
+    }
+  ],
+  "semantic_assumption": "A reported, analyzed, stored, rejected or historical instruction is data; a direction addressed to the current assistant that replaces the task is active answer hijacking.",
+  "coverage": "All six training and both development role-family definitions inspected; 24 sampled training cases plus eight supplementary role contrasts inspected before training. Quotes occur under both labels. Final families remain construction-based authoring, not human-reviewed validation.",
+  "limitations": [
+    "This is an assistant audit of authored labels, not independent human review.",
+    "Some public passages contain visible captions/navigation; no broad cleaning was performed.",
+    "No review gate or reserved external challenge was bypassed."
+  ],
+  "sampled_audit_sha256": "a30a464f3fb2f681d977bad872c6311f729998686c76fdbbc1b7598231602cdf",
+  "offline_tests": {
+    "passed": true,
+    "count": 63,
+    "log_sha256": "c6da3fcd48ae4f79c9b793a549730cb49d0fd65970a84630f7821e3f3a3713e6"
+  }
+}

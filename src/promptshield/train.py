@@ -18,6 +18,7 @@ from promptshield.common import choose_device, read_json, read_jsonl, seed_every
 from promptshield.data import Collator, TextDataset
 from promptshield.scoring import metrics, select_threshold
 from promptshield.pairwise import PairedDataset, PairBatchSampler, ranking_sum
+from promptshield.consistency import ConsistencyDataset, ConsistencyBatchSampler, consistency_sum
 
 
 def load_config(path):
@@ -26,7 +27,7 @@ def load_config(path):
                 "encoder_lr", "head_lr", "weight_decay", "warmup_ratio", "max_length", "pooling",
                 "dropout", "frozen", "weighted_loss", "max_fpr", "device"}
     optional = {"initial_checkpoint", "initial_weights_sha256", "paired_batches", "ranking_weight",
-                "ranking_margin", "input_format"}
+                "ranking_margin", "input_format", "consistency_batches", "consistency_weight"}
     if set(config) - optional != required:
         missing = required - set(config)
         extra = set(config) - required - optional
@@ -46,6 +47,13 @@ def load_config(path):
         raise ValueError("Ranking weight must be nonnegative and margin positive.")
     if config.get("ranking_weight", 0) and not config.get("paired_batches"):
         raise ValueError("Ranking requires paired_batches.")
+    consistency_weight = config.get("consistency_weight", 0)
+    if not isinstance(consistency_weight, (int, float)) or not math.isfinite(consistency_weight) or consistency_weight < 0:
+        raise ValueError("Consistency weight must be finite and nonnegative")
+    if consistency_weight and not config.get("consistency_batches"):
+        raise ValueError("Consistency loss requires consistency_batches")
+    if config.get("consistency_batches") and (config.get("paired_batches") or config["batch_size"] % 4):
+        raise ValueError("Consistency uses its own quartet sampler and a batch size divisible by four")
     return config
 
 
@@ -174,7 +182,7 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
         valid_rows = valid_rows[:limit_validation]
     if {r["label"] for r in rows} != {0, 1} or {r["label"] for r in valid_rows} != {0, 1}:
         raise ValueError("Training and validation must each contain both labels.")
-    dataset_type = PairedDataset if config.get("paired_batches") else TextDataset
+    dataset_type = ConsistencyDataset if config.get("consistency_batches") else PairedDataset if config.get("paired_batches") else TextDataset
     dataset = dataset_type(rows, tokenizer, config["max_length"])
     validation = TextDataset(valid_rows, tokenizer, config["max_length"])
     model = InjectionClassifier.from_backbone(config["backbone"], pooling=config["pooling"],
@@ -213,6 +221,7 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
     epoch0 = batch0 = updates = 0
     best_ap = -1.0
     epoch_loss0 = epoch_examples0 = 0
+    epoch_ce0 = epoch_consistency0 = 0
     if resume:
         if read_json(run / "config.json") != config:
             raise ValueError("Resume configuration differs from the saved run.")
@@ -227,6 +236,7 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
         scheduler.load_state_dict(state["scheduler"])
         epoch0, batch0, updates, best_ap = state["epoch"], state["next_batch"], state["updates"], state["best_ap"]
         epoch_loss0, epoch_examples0 = state.get("epoch_loss", 0), state.get("epoch_examples", 0)
+        epoch_ce0, epoch_consistency0 = state.get("epoch_ce_loss", 0), state.get("epoch_consistency_loss", 0)
         restore_rng(state["rng"], device)
     else:
         write_json(run / "config.json", config)
@@ -242,7 +252,10 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
     paused = False
     try:
         for epoch in range(epoch0, config["epochs"]):
-            if config.get("paired_batches"):
+            if config.get("consistency_batches"):
+                loader = DataLoader(dataset, batch_sampler=ConsistencyBatchSampler(rows, config["batch_size"], config["seed"] + epoch),
+                                    generator=torch.Generator().manual_seed(config["seed"] + epoch), collate_fn=Collator(tokenizer))
+            elif config.get("paired_batches"):
                 loader = DataLoader(dataset, batch_sampler=PairBatchSampler(rows, config["batch_size"], config["seed"] + epoch),
                                     generator=torch.Generator().manual_seed(config["seed"] + epoch), collate_fn=Collator(tokenizer))
             else:
@@ -252,6 +265,7 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
             model.train()
             optimizer.zero_grad(set_to_none=True)
             epoch_loss, epoch_examples = (epoch_loss0, epoch_examples0) if epoch == epoch0 else (0, 0)
+            epoch_ce, epoch_consistency = (epoch_ce0, epoch_consistency0) if epoch == epoch0 else (0, 0)
             grad_norm = 0.0
             for index, batch in enumerate(loader):
                 if epoch == epoch0 and index < batch0:
@@ -265,6 +279,11 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
                 window_start = index // config["accumulation_steps"] * config["accumulation_steps"] * config["batch_size"]
                 window_examples = min(config["accumulation_steps"] * config["batch_size"], len(dataset) - window_start)
                 objective = losses.sum()
+                if config.get("consistency_batches"):
+                    penalty = consistency_sum(logits, batch["labels"], batch["consistency_ids"])
+                    objective = objective+config.get("consistency_weight", 0)*penalty
+                    epoch_ce += losses.detach().sum().item()
+                    epoch_consistency += penalty.detach().item()
                 if config.get("ranking_weight", 0):
                     objective = objective + config["ranking_weight"] * ranking_sum(
                         logits, batch["labels"], batch["pair_ids"], config.get("ranking_margin", 1.0))
@@ -303,6 +322,9 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
                               "train_loss": epoch_loss/epoch_examples, "validation_loss": val_loss,
                               "gradient_norm": grad_norm, "head_lr": optimizer.param_groups[-1]["lr"],
                               "elapsed_seconds": time.perf_counter() - start, "validation": validation_metrics}
+                    if config.get("consistency_batches"):
+                        record.update(train_ce_loss=epoch_ce/epoch_examples, train_consistency_loss=epoch_consistency/epoch_examples,
+                                      consistency_weight=config.get("consistency_weight", 0))
                     with (run / "history.jsonl").open("a", encoding="utf-8") as handle:
                         import json
                         handle.write(json.dumps(record, allow_nan=False) + "\n")
@@ -317,6 +339,9 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
                              "best_ap": best_ap, "rng": rng_state(device),
                              "epoch_loss": epoch_loss if next_epoch == epoch else 0,
                              "epoch_examples": epoch_examples if next_epoch == epoch else 0}
+                    if config.get("consistency_batches"):
+                        state.update(epoch_ce_loss=epoch_ce if next_epoch == epoch else 0,
+                                     epoch_consistency_loss=epoch_consistency if next_epoch == epoch else 0)
                     torch.save(state, run / "last/training_state.tmp")
                     os.replace(run / "last/training_state.tmp", run / "last/training_state.pt")
                     print(f"validation: AP={ap:.4f} F1={validation_metrics['f1']:.4f} FPR={validation_metrics['benign_fpr']:.4f}; saved", flush=True)
