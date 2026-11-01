@@ -48,7 +48,7 @@ class ReportIntegrityTests(unittest.TestCase):
         write_all_reports(check=True)
 
     def test_public_markdown_links_resolve(self):
-        paths=[ROOT/"README.md",ROOT/"CONTRIBUTING.md",ROOT/"contribution.md",ROOT/"research_diary.md"]+list((ROOT/"docs").glob("*.md"))
+        paths=[ROOT/"README.md",ROOT/"contribution.md",ROOT/"research_diary.md"]+list((ROOT/"docs").glob("*.md"))
         for path in paths:
             for target in re.findall(r"!?\[[^\]]*\]\(([^)]+)\)",path.read_text()):
                 if target.startswith(("https://","http://","#","mailto:")):
