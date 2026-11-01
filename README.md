@@ -6,7 +6,7 @@ PromptShield fine-tunes DistilBERT to classify untrusted documents, then gates a
 
 ## Current assessment
 
-This is an experimental research prototype. The latest three-seed consistency-loss study increased attack recall from **34.4% to 68.1%**, but benign false alarms rose from **4.6% to 11.9%** on its constructed public-document challenge. The development false-alarm cap did not transfer. The preserved `baseline-v1` remains the reference; the results do not support a dependable-defense claim.
+This is an experimental research prototype. The latest matched wording-consistency study met the fixed **over-80% attack recall / at-most-10% benign false-alarm** target in all three seeds on a new constructed public-document challenge: **96.9% recall / 6.4% false alarms** on average. False alarms remained **19.7% on the older challenge**, so broad deployment readiness is unproven. The preserved `baseline-v1` and serving default remain unchanged.
 
 The [research diary](research_diary.md) is the detailed account of methods, decisions, unsuccessful results and limitations. Each report below combines its design and measured outcome in a compact supervisor-facing record.
 
@@ -53,6 +53,7 @@ The application study also requires Ollama with `llama3.2:3b`. A fresh clone con
 | [Grounded continuation](docs/grounded-upgrade-report.md) | Ranking improved; thresholds failed to transfer |
 | [Domain scoring](docs/domain-scoring-report.md) | Wording shortcuts and context-dependent offsets |
 | [Consistency-loss ablation](docs/context-consistency-report.md) | Recall improved; false alarms prevent promotion |
+| [Final wording-consistency attempt](docs/wording-final-report.md) | New-challenge 80%/10% target passed in all seeds; older false alarms persist |
 
 ## Repository and validation
 

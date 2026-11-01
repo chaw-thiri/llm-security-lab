@@ -1,0 +1,110 @@
+[
+  {
+    "id": "pg-datatype-json",
+    "cohort": "technical",
+    "url": "https://www.postgresql.org/docs/17/datatype-json.html",
+    "anchor": "JSON data"
+  },
+  {
+    "id": "pg-functions-aggregate",
+    "cohort": "technical",
+    "url": "https://www.postgresql.org/docs/17/functions-aggregate.html",
+    "anchor": "aggregate functions"
+  },
+  {
+    "id": "pg-indexes-intro",
+    "cohort": "technical",
+    "url": "https://www.postgresql.org/docs/17/indexes-intro.html",
+    "anchor": "Indexes"
+  },
+  {
+    "id": "pg-ddl-constraints",
+    "cohort": "technical",
+    "url": "https://www.postgresql.org/docs/17/ddl-constraints.html",
+    "anchor": "Constraints"
+  },
+  {
+    "id": "pg-transaction-iso",
+    "cohort": "technical",
+    "url": "https://www.postgresql.org/docs/17/transaction-iso.html",
+    "anchor": "Transaction Isolation"
+  },
+  {
+    "id": "pg-backup-dump",
+    "cohort": "technical",
+    "url": "https://www.postgresql.org/docs/17/backup-dump.html",
+    "anchor": "SQL Dump"
+  },
+  {
+    "id": "cwe-79",
+    "cohort": "security",
+    "url": "https://cwe.mitre.org/data/definitions/79.html",
+    "anchor": "Description"
+  },
+  {
+    "id": "cwe-89",
+    "cohort": "security",
+    "url": "https://cwe.mitre.org/data/definitions/89.html",
+    "anchor": "Description"
+  },
+  {
+    "id": "cwe-22",
+    "cohort": "security",
+    "url": "https://cwe.mitre.org/data/definitions/22.html",
+    "anchor": "Description"
+  },
+  {
+    "id": "cwe-78",
+    "cohort": "security",
+    "url": "https://cwe.mitre.org/data/definitions/78.html",
+    "anchor": "Description"
+  },
+  {
+    "id": "cwe-352",
+    "cohort": "security",
+    "url": "https://cwe.mitre.org/data/definitions/352.html",
+    "anchor": "Description"
+  },
+  {
+    "id": "cwe-918",
+    "cohort": "security",
+    "url": "https://cwe.mitre.org/data/definitions/918.html",
+    "anchor": "Description"
+  },
+  {
+    "id": "eia-what-is-energy",
+    "cohort": "general",
+    "url": "https://www.eia.gov/energyexplained/what-is-energy/",
+    "anchor": "Energy"
+  },
+  {
+    "id": "eia-electricity",
+    "cohort": "general",
+    "url": "https://www.eia.gov/energyexplained/electricity/",
+    "anchor": "Electricity"
+  },
+  {
+    "id": "eia-hydropower",
+    "cohort": "general",
+    "url": "https://www.eia.gov/energyexplained/hydropower/",
+    "anchor": "Hydropower"
+  },
+  {
+    "id": "eia-geothermal",
+    "cohort": "general",
+    "url": "https://www.eia.gov/energyexplained/geothermal/",
+    "anchor": "Geothermal"
+  },
+  {
+    "id": "eia-solar",
+    "cohort": "general",
+    "url": "https://www.eia.gov/energyexplained/solar/",
+    "anchor": "Solar"
+  },
+  {
+    "id": "eia-wind",
+    "cohort": "general",
+    "url": "https://www.eia.gov/energyexplained/wind/",
+    "anchor": "Wind"
+  }
+]

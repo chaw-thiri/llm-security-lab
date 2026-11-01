@@ -1,0 +1,13 @@
+{
+  "data_manifest_sha256": "eb14ad381521931be1a729d0e42b0286c3a696b8d1598a7394463bede84e70de",
+  "assistant_semantic_audit_completed": true,
+  "independent_human_review_completed": false,
+  "reviewed_rows": 49,
+  "audit_sha256": "d6a354440f99019eff39d0e6dda0950a7bef1031d9f79d6f6bd82f68d0680fe4",
+  "source_previews_reviewed": 18,
+  "scope": "One representative per style/label/split, plus all final source previews; construction labels, not exhaustive or independent review",
+  "finding": "Both labels include hostile inner strings and quotation variants. Active cases explicitly address the current assistant; benign cases describe prior, fictional, or analytical material. v1 bare quoted-active ambiguity corrected before training.",
+  "extraction": "Official article regions; PostgreSQL sect1, EIA article-content, CWE Description/Extended_Description/Technical_Nuance/Potential_Mitigations/Background_Details. Source windows can overlap within page; 18 pages, not 1764 independent documents.",
+  "preflight_v1_rejected_before_training": true,
+  "reserved_external_challenge_used": false
+}

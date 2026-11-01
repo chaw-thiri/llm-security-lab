@@ -55,6 +55,8 @@ Exact historical protocol text is retained in `docs/provenance/frozen-protocols.
 
 The exact pre-refactor consistency source/configuration is preserved in `docs/provenance/context-consistency-execution.json`. Historical replay requires those bytes, frozen protocols and retained data/checkpoints in a separate checkout. Do not replace an old execution manifest to imply that revised code produced its results. Completed-study report-only entry points perform no training; incomplete runs retain compatibility checks.
 
+The final wording study uses the structured `docs/wording-final-protocol.json`, hashed before training. Its exact execution/configuration/protocol/audit bytes are retained in `docs/provenance/wording-final-execution.json`; its completed runner delegates presentation to the shared renderer. Restore archived execution bytes for exact historical replay, with the retained source snapshots and initializer. `python scripts/summarize_wording_final.py` audits cached errors without refitting thresholds.
+
 ## Data review
 
 The BIPIA-derived corpus remains a candidate dataset. Begin with the blinded 60-case training/development starter at `data/review/external-tasks-v2/start-here.jsonl`; final challenge material is excluded from that starter.

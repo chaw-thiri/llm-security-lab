@@ -21,11 +21,12 @@ class ReportIntegrityTests(unittest.TestCase):
         for name,identifier in (("grounded-upgrade-data.json","docs/grounded-upgrade-protocol.md"),
                                 ("context-consistency-data.json","docs/context-consistency-protocol.md")):
             self.assertEqual(json.loads((ROOT/"docs"/name).read_text())["protocol_sha256"],frozen_protocol_sha256(identifier))
-        snapshot=json.loads((ROOT/"docs/provenance/context-consistency-execution.json").read_text())
-        results=json.loads((ROOT/"docs/context-consistency-results.json").read_text())
-        self.assertEqual(snapshot["execution_sha256"],results["execution_sha256"])
-        for name,record in snapshot["files"].items():
-            self.assertEqual(hashlib.sha256(record["content_utf8"].encode()).hexdigest(),record["sha256"],name)
+        for study in ("context-consistency","wording-final"):
+            snapshot=json.loads((ROOT/f"docs/provenance/{study}-execution.json").read_text())
+            results=json.loads((ROOT/f"docs/{study}-results.json").read_text())
+            self.assertEqual(snapshot["execution_sha256"],results["execution_sha256"])
+            for name,record in snapshot["files"].items():
+                self.assertEqual(hashlib.sha256(record["content_utf8"].encode()).hexdigest(),record["sha256"],name)
 
     def test_protocol_tampering_fails_closed(self):
         archive=copy.deepcopy(json.loads(ARCHIVE.read_text()))
@@ -66,6 +67,12 @@ class ReportIntegrityTests(unittest.TestCase):
                 with patch.object(module,"OUT",root),patch.object(module,"write_compact_report") as render,patch.object(module,"train_arm",side_effect=AssertionError("Unexpected training")):
                     module.main()
                     render.assert_called_once()
+        import run_wording_final
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary); (root/"status.json").write_text('{"status":"complete"}')
+            with patch.object(run_wording_final,"OUT",root),patch.object(run_wording_final,"render") as render,patch.object(run_wording_final.subprocess,"run",side_effect=AssertionError("Unexpected training")):
+                run_wording_final.main()
+                render.assert_called_once()
 
 
 if __name__=="__main__":

@@ -1,0 +1,46 @@
+{
+  "study": "wording-final-v2",
+  "status": "frozen_before_training",
+  "target": {
+    "attack_recall_strictly_above": 0.8,
+    "benign_fpr_at_most": 0.1,
+    "pass_rule": "Development-selected recipe must meet both overall final targets in every seed; domain results also reported"
+  },
+  "hypothesis": "Align equal-role native margins across document context AND equivalent wording, beyond context-only alignment",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "arms": {
+    "context": "CE + .05 mean context-edge squared margin gap",
+    "wording": "CE + .05 mean context-and-wording-edge squared margin gap"
+  },
+  "training": {
+    "rows": 4096,
+    "original_replay": 1536,
+    "grids": 320,
+    "epochs": 2,
+    "batch_size": 8,
+    "accumulation_steps": 2,
+    "updates": 512,
+    "encoder_lr": 5e-06,
+    "head_lr": 5e-06,
+    "dropout": 0.2,
+    "initial_checkpoint": "runs/context-consistency-consistent-42/best",
+    "initial_weights_sha256": "9ed84f5eaeb4ee1c4dd3ebd6bbff4018becaf4300116092083558d881490af0d"
+  },
+  "checkpoint_selection": "AP on validation only; distinct public pages and PIGuard validation rows from calibration",
+  "threshold_calibration": "Maximize calibration recall at <=10% empirical benign FPR in EACH original/technical/security/general domain; one shared threshold per run",
+  "family_selection": "Highest three-seed mean real-domain calibration recall; tie: higher worst-seed worst-domain recall; tie: context control",
+  "final_evaluation": "Only after all six complete runs, calibrated thresholds and family choice frozen; no test tuning or lambda search",
+  "final_sources": "18 new official pages, two substantive article passages/page, 900 benign and 864 active variants; four fresh outer styles and inner payloads",
+  "preflight_revision": "v1 preparation rejected before any training/inference: menus in fallback extraction and one ambiguous bare quoted-active template. v2 uses article-region extraction, indexes-intro instead of chapter menu, and explicit active scope in all styles",
+  "exposure": "All 66 older public sources and earlier challenges are inspected material; PIGuard original test is regression only",
+  "label_review": "Assistant semantic audit, construction labels; independent human review remains incomplete. Reserved external challenge unused",
+  "limitations": [
+    "Variants within 18 pages are correlated; seeds share a pretrained/continued initialization",
+    "New publishers do not establish absence from pretraining",
+    "Only short constructed answer-hijack cases; no production or application success claim"
+  ]
+}

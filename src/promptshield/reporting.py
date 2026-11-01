@@ -17,6 +17,7 @@ REPORTS = {
     "grounded-upgrade": ("grounded-upgrade-report.md", "grounded-upgrade-results.json", "grounded-upgrade-protocol.md"),
     "domain-scoring": ("domain-scoring-report.md", "domain-scoring-investigation.json", "domain-scoring-protocol.md"),
     "context-consistency": ("context-consistency-report.md", "context-consistency-results.json", "context-consistency-protocol.md"),
+    "wording-final": ("wording-final-report.md", "wording-final-results.json", None),
 }
 
 
@@ -37,9 +38,36 @@ def page(title, assessment, design, results, decision, limits, evidence):
     return f"# {title}\n\n**Assessment:** {assessment}\n\n## Design\n\n{design}\n\n## Results\n\n{results}\n\n## Decision and limitations\n\n{decision}\n\n{limits}\n\n**Records:** {evidence} Detailed rationale and chronology: [research diary](../research_diary.md).\n"
 
 
+def build_wording_report(r):
+    chosen=r["family_decision"]["selected_family"]
+    seeds=[r["models"][f"{chosen}-{s}"] for s in (42,43,44)]
+    rows=[]
+    for name,v in r["models"].items():
+        m=v["final"]["metrics"]
+        worst=max(d["benign_fpr"] for d in v["final"]["by_domain"].values())
+        rows.append(["Initializer (own threshold)" if name=="previous-consistency-original" else name,
+                     pct(m["recall"]),pct(m["benign_fpr"]),pct(worst),f"{m['roc_auc']:.3f}",pct(v["original_regression"]["metrics"]["f1"])])
+    domains="; ".join(f"{d}: {pct(mean(v['final']['by_domain'][d]['recall'] for v in seeds))} recall / {pct(mean(v['final']['by_domain'][d]['benign_fpr'] for v in seeds))} FPR" for d in ("technical","security","general"))
+    old_recall=mean(v["exposed_challenge_regression"]["metrics"]["recall"] for v in seeds)
+    old_fpr=mean(v["exposed_challenge_regression"]["metrics"]["benign_fpr"] for v in seeds)
+    assessment=("The calibration-selected recipe met the fixed overall target in every seed." if r["milestone_passed"]
+                else "The calibration-selected recipe did not meet the fixed overall target in every seed.")
+    return page("Final wording-consistency attempt — supervisor report",assessment,
+        "Two matched full first-token DistilBERT recipes continued the predeclared prior consistency seed-42 weights (66,955,010 trainable parameters). Both used 4,096 balanced rows, including 1,536 original replay rows and 320 eight-example grids, two epochs, batch eight, accumulation two and 512 updates at 5e-6 learning rates. CE plus 0.05-weighted mean context-edge margin consistency was compared with equally weighted context-and-wording consistency. Seeds 42/43/44 ran unconditionally.\n\n"
+        "Checkpoint AP used 1,024 rows; disjoint 2,048-row calibration selected shared thresholds at <=10% benign FPR per development domain. Three-seed calibration recall selected the recipe before final scoring. The frozen final challenge contains 1,764 constructions (900 benign, 864 attacks) on 18 new official PostgreSQL, MITRE CWE and EIA pages, with held-out outer styles and payload wording. A pass requires **over 80% overall recall and <=10% overall benign FPR in every seed**.",
+        table(["Recipe","Recall","Overall FPR","Worst-domain FPR","ROC-AUC","PIGuard F1"],rows)+
+        f"\n\nCalibration selected **{chosen}**. Selected-family final domain means: {domains}. On the inspected previous challenge: **{pct(old_recall)} recall / {pct(old_fpr)} FPR**.",
+        ("Freeze this empirical milestone. Older-challenge and general-domain false alarms still exceed 10%; independently review those errors and test task-conditioned verification with unprotected/detector-only application controls before serving promotion." if r["milestone_passed"] else
+         "Close this fixed recipe attempt without another test-driven threshold/loss sweep. Next, test a task-conditioned instruction verifier against unprotected and detector-only application controls.")+" Preserve baseline weights and serving defaults.",
+        "Construction labels received an assistant audit, not independent human review. Variants share 18 pages, overlapping passages and templates; seeds share initialization. All active wrappers explicitly request current execution. These short answer-hijack cases do not establish adaptive-attack or full-document safety. Only the within-study matched comparison isolates the wording loss; the initializer retains its own original threshold and older studies used different data. Preflight v1 was rejected before training; corrected v2 was frozen without outcome-based filtering.",
+        "[Protocol](wording-final-protocol.json) · [Data](wording-final-data.json) · [Results](wording-final-results.json) · [Cross-seed/error audit](wording-final-summary.json) · [Semantic audit](wording-final-semantic-audit.json) · [Execution archive](provenance/wording-final-execution.json). Local joined errors: `results/wording-final-v2/per-example-errors.jsonl`.")
+
+
 def build_report(study, root=ROOT):
     filename, record, protocol = REPORTS[study]
     r = load(root, record)
+    if study == "wording-final":
+        return build_wording_report(r)
     evidence = f"[Measured record]({record})."
     if protocol:
         evidence += f" [Frozen protocol](provenance/frozen-protocols.json), key `docs/{protocol}`."

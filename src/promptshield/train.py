@@ -19,6 +19,7 @@ from promptshield.data import Collator, TextDataset
 from promptshield.scoring import metrics, select_threshold
 from promptshield.pairwise import PairedDataset, PairBatchSampler, ranking_sum
 from promptshield.consistency import ConsistencyDataset, ConsistencyBatchSampler, consistency_sum
+from promptshield.wording import WordingDataset, WordingBatchSampler, wording_sum
 
 
 def load_config(path):
@@ -27,7 +28,7 @@ def load_config(path):
                 "encoder_lr", "head_lr", "weight_decay", "warmup_ratio", "max_length", "pooling",
                 "dropout", "frozen", "weighted_loss", "max_fpr", "device"}
     optional = {"initial_checkpoint", "initial_weights_sha256", "paired_batches", "ranking_weight",
-                "ranking_margin", "input_format", "consistency_batches", "consistency_weight"}
+                "ranking_margin", "input_format", "consistency_batches", "consistency_weight", "wording_batches", "consistency_axes"}
     if set(config) - optional != required:
         missing = required - set(config)
         extra = set(config) - required - optional
@@ -50,8 +51,15 @@ def load_config(path):
     consistency_weight = config.get("consistency_weight", 0)
     if not isinstance(consistency_weight, (int, float)) or not math.isfinite(consistency_weight) or consistency_weight < 0:
         raise ValueError("Consistency weight must be finite and nonnegative")
-    if consistency_weight and not config.get("consistency_batches"):
-        raise ValueError("Consistency loss requires consistency_batches")
+    if consistency_weight and not (config.get("consistency_batches") or config.get("wording_batches")):
+        raise ValueError("Consistency loss requires grouped batches")
+    if config.get("wording_batches"):
+        if config.get("consistency_batches") or config.get("paired_batches") or config["batch_size"] % 8:
+            raise ValueError("Wording grids require their own sampler and a batch size divisible by eight")
+        if config.get("consistency_axes") not in ("context", "context_wording"):
+            raise ValueError("Wording grids require explicit consistency_axes")
+    elif "consistency_axes" in config:
+        raise ValueError("consistency_axes requires wording_batches")
     if config.get("consistency_batches") and (config.get("paired_batches") or config["batch_size"] % 4):
         raise ValueError("Consistency uses its own quartet sampler and a batch size divisible by four")
     return config
@@ -182,7 +190,8 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
         valid_rows = valid_rows[:limit_validation]
     if {r["label"] for r in rows} != {0, 1} or {r["label"] for r in valid_rows} != {0, 1}:
         raise ValueError("Training and validation must each contain both labels.")
-    dataset_type = ConsistencyDataset if config.get("consistency_batches") else PairedDataset if config.get("paired_batches") else TextDataset
+    grouped = bool(config.get("consistency_batches") or config.get("wording_batches"))
+    dataset_type = WordingDataset if config.get("wording_batches") else ConsistencyDataset if config.get("consistency_batches") else PairedDataset if config.get("paired_batches") else TextDataset
     dataset = dataset_type(rows, tokenizer, config["max_length"])
     validation = TextDataset(valid_rows, tokenizer, config["max_length"])
     model = InjectionClassifier.from_backbone(config["backbone"], pooling=config["pooling"],
@@ -252,7 +261,10 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
     paused = False
     try:
         for epoch in range(epoch0, config["epochs"]):
-            if config.get("consistency_batches"):
+            if config.get("wording_batches"):
+                loader = DataLoader(dataset, batch_sampler=WordingBatchSampler(rows, config["batch_size"], config["seed"] + epoch),
+                                    generator=torch.Generator().manual_seed(config["seed"] + epoch), collate_fn=Collator(tokenizer))
+            elif config.get("consistency_batches"):
                 loader = DataLoader(dataset, batch_sampler=ConsistencyBatchSampler(rows, config["batch_size"], config["seed"] + epoch),
                                     generator=torch.Generator().manual_seed(config["seed"] + epoch), collate_fn=Collator(tokenizer))
             elif config.get("paired_batches"):
@@ -279,8 +291,10 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
                 window_start = index // config["accumulation_steps"] * config["accumulation_steps"] * config["batch_size"]
                 window_examples = min(config["accumulation_steps"] * config["batch_size"], len(dataset) - window_start)
                 objective = losses.sum()
-                if config.get("consistency_batches"):
-                    penalty = consistency_sum(logits, batch["labels"], batch["consistency_ids"])
+                if grouped:
+                    penalty = (wording_sum(logits, batch["labels"], batch["consistency_ids"], batch["grid_context_ids"],
+                                           batch["grid_wording_ids"], config["consistency_axes"]) if config.get("wording_batches")
+                               else consistency_sum(logits, batch["labels"], batch["consistency_ids"]))
                     objective = objective+config.get("consistency_weight", 0)*penalty
                     epoch_ce += losses.detach().sum().item()
                     epoch_consistency += penalty.detach().item()
@@ -322,7 +336,7 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
                               "train_loss": epoch_loss/epoch_examples, "validation_loss": val_loss,
                               "gradient_norm": grad_norm, "head_lr": optimizer.param_groups[-1]["lr"],
                               "elapsed_seconds": time.perf_counter() - start, "validation": validation_metrics}
-                    if config.get("consistency_batches"):
+                    if grouped:
                         record.update(train_ce_loss=epoch_ce/epoch_examples, train_consistency_loss=epoch_consistency/epoch_examples,
                                       consistency_weight=config.get("consistency_weight", 0))
                     with (run / "history.jsonl").open("a", encoding="utf-8") as handle:
@@ -339,7 +353,7 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
                              "best_ap": best_ap, "rng": rng_state(device),
                              "epoch_loss": epoch_loss if next_epoch == epoch else 0,
                              "epoch_examples": epoch_examples if next_epoch == epoch else 0}
-                    if config.get("consistency_batches"):
+                    if grouped:
                         state.update(epoch_ce_loss=epoch_ce if next_epoch == epoch else 0,
                                      epoch_consistency_loss=epoch_consistency if next_epoch == epoch else 0)
                     torch.save(state, run / "last/training_state.tmp")
