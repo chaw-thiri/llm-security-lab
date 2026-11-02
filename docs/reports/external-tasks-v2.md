@@ -20,4 +20,4 @@ Keep export blocked until complete human annotations pass validation. The 60-cas
 
 The mixture is table-heavy and attack-heavy; repeated variants are not independent documents. Longer inputs remain complete and flagged. Review attestations cannot establish that a person actually performed the review.
 
-**Records:** [Measured record](external-tasks-v2-manifest.json). [Source provenance](bipia-source.json) · [review procedure](../contribution.md#data-review). Detailed rationale and chronology: [research diary](../research_diary.md).
+**Records:** [Measured record](../records/external-tasks-v2-manifest.json). [Source provenance](../records/bipia-source.json) · [review procedure](../../contribution.md#data-review). Detailed rationale and chronology: [research diary](../../research_diary.md).

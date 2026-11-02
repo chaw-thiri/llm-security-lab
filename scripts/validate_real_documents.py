@@ -69,7 +69,7 @@ def load_frozen():
     for filename, expected in manifest["files"].items():
         if sha256(ROOT/filename) != expected:
             raise ValueError(f"Frozen cases changed: {filename}")
-    for path, key in (("configs/real-document-sources.json","source_plan_sha256"),
+    for path, key in (("configs/real-document/sources.json","source_plan_sha256"),
                       ("docs/real-document-validation-protocol.md","protocol_sha256"),
                       ("src/promptshield/application.py","application_sha256")):
         actual = frozen_protocol_sha256(path) if key == "protocol_sha256" else sha256(path)
@@ -232,7 +232,7 @@ def main():
                                           "measured_marker_security_gain":ungated["attack_success_exact_count"]>summary["attack_success_exact_count"]}
     report["release_status"] = "research_release_only_security_mvp_targets_not_met" if not report["release_decision"]["document-42"]["all_sample_targets_pass"] else "sample_targets_pass_require_scope_and_human_review_before_security_claim"
     write_json(OUT/"report.json",report)
-    write_json("docs/real-document-results.json",report)
+    write_json("docs/records/real-document-results.json",report)
     write_report(report,manifest)
     write_json(OUT/"status.json",{"status":"complete","release_status":report["release_status"]})
     print("REAL DOCUMENT VALIDATION COMPLETE",report["release_status"],flush=True)

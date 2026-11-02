@@ -17,7 +17,7 @@ def average(values):
 def main():
     if read_json(OUT/"status.json")["status"] != "complete":
         raise RuntimeError("Wait for all fixed evaluations and the diary update to finish")
-    study = read_json("docs/context-consistency-results.json")
+    study = read_json("docs/records/context-consistency-results.json")
     path = Path("data/splits/context-consistency-v1/test.jsonl")
     manifest = read_json(path.parent/"manifest.json")
     if sha256(path) != manifest["splits"]["test"]["sha256"] or sha256(path.parent/"manifest.json") != study["data_manifest_sha256"]:
@@ -30,7 +30,7 @@ def main():
         saved = read_json(OUT/f"final-{model['weights_sha256'][:16]}.json")
         predictions[name] = checked_scores(saved,cases,model["weights_sha256"],sha256(path))
     report = dict(scope="Post-hoc descriptive summary of the fixed loss ablation; no thresholds or models selected here",
-                  source_results_sha256=sha256("docs/context-consistency-results.json"), final_cases_sha256=sha256(path),
+                  source_results_sha256=sha256("docs/records/context-consistency-results.json"), final_cases_sha256=sha256(path),
                   arms={}, paired_seed_changes={}, common_errors={})
     for arm,names in arms.items():
         report["arms"][arm] = dict(seeds=names,final={},by_domain={},original_regression={},development={})
@@ -83,7 +83,7 @@ def main():
             if not case["label"] and all(decisions):
                 common["false_alarms"].append(case["id"])
         report["common_errors"][arm] = common
-    write_json("docs/context-consistency-summary.json",report)
+    write_json("docs/records/context-consistency-summary.json",report)
     write_compact_report("context-consistency")
     print("Summary and local per-example errors written",flush=True)
 

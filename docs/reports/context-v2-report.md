@@ -22,4 +22,4 @@ Retain the baseline; use CE as the simpler contextual reference for subsequent i
 
 The 128 challenge cases share an author and construction style; seeds share baseline weights. This is not independent generation per gate or evidence against adaptive attacks.
 
-**Records:** [Measured record](context-v2-results.json). [Frozen protocol](provenance/frozen-protocols.json), key `docs/context-v2-protocol.md`. [Data review](context-v2-data-review.json). Detailed rationale and chronology: [research diary](../research_diary.md).
+**Records:** [Measured record](../records/context-v2-results.json). [Frozen protocol](../provenance/frozen-protocols.json), key `docs/context-v2-protocol.md`. [Data review](../records/context-v2-data-review.json). Detailed rationale and chronology: [research diary](../../research_diary.md).

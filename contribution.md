@@ -41,7 +41,9 @@ Retain subgroup denominators. Repeated variants and seeds do not create independ
 | `contribution.md` | Implementation, experiment, review and documentation procedures |
 | `research_diary.md` | Most detailed record: methods, controls, results, limitations and decisions |
 
-Each study has one compact `docs/` report combining assessment, design, results, decision and evidence links. Keep conversational Q&A, teaching exchanges and duplicated progress logs out of these reports. Full measurements and hashes belong in JSON; the diary explains their significance.
+The [study reports](docs/reports/) combine design, results and limitations. Their links point to [measured JSON records](docs/records/) and [figures](docs/figures/); the diary records decisions and smaller follow-up checks. Keep conversational Q&A and duplicated progress logs out of these reports. The baseline manifest still references `docs/experiment-results.json` at its original path.
+
+Group new configurations under `configs/<study>/`. The four original baseline/smoke configurations stay at their recorded locations. Run scripts from the repository root. For historical execution that depends on the original directory layout, use a separate checkout of the study commit (for example, `ab1adc2` for the final wording study) with the matching archived execution bytes. Paths inside frozen scientific records describe that historical checkout.
 
 `src/promptshield/reporting.py` owns compact report templates. Regenerate them with:
 
@@ -55,7 +57,7 @@ Exact historical protocol text is retained in `docs/provenance/frozen-protocols.
 
 The exact pre-refactor consistency source/configuration is preserved in `docs/provenance/context-consistency-execution.json`. Historical replay requires those bytes, frozen protocols and retained data/checkpoints in a separate checkout. Do not replace an old execution manifest to imply that revised code produced its results. Completed-study report-only entry points perform no training; incomplete runs retain compatibility checks.
 
-The final wording study uses the structured `docs/wording-final-protocol.json`, hashed before training. Its exact execution/configuration/protocol/audit bytes are retained in `docs/provenance/wording-final-execution.json`; its completed runner delegates presentation to the shared renderer. Restore archived execution bytes for exact historical replay, with the retained source snapshots and initializer. `python scripts/summarize_wording_final.py` audits cached errors without refitting thresholds.
+The final wording study uses the structured `docs/records/wording-final-protocol.json`, hashed before training. Its exact execution/configuration/protocol/audit bytes are retained in `docs/provenance/wording-final-execution.json`; its completed runner delegates presentation to the shared renderer. Restore archived execution bytes for exact historical replay, with the retained source snapshots and initializer. `python scripts/summarize_wording_final.py` audits cached errors without refitting thresholds.
 
 ## Data review
 

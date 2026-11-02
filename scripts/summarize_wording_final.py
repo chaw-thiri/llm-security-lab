@@ -7,7 +7,7 @@ from prepare_wording_final import DATA,OUT
 
 
 def main():
-    report=read_json("docs/wording-final-results.json")
+    report=read_json("docs/records/wording-final-results.json")
     if read_json(OUT/"status.json")["status"]!="complete":raise RuntimeError("Study must be complete")
     if sha256(DATA/"test.jsonl")!=read_json(DATA/"manifest.json")["splits"]["test"]["sha256"]:
         raise ValueError("Final examples changed")
@@ -74,7 +74,7 @@ def main():
         shared_errors_by_role_and_label={f"{k[0]}:{k[1]}":v for k,v in Counter((r["role_family"],r["label"]) for r in common).items()},
         local_errors=str(OUT/"exposed-regression-errors.jsonl"),review_status="Posthoc assistant inspection; no new independent review or tuning")
     write_jsonl(OUT/"exposed-regression-errors.jsonl",old_errors)
-    write_json("docs/wording-final-summary.json",summary)
+    write_json("docs/records/wording-final-summary.json",summary)
     print(summary,flush=True)
 
 

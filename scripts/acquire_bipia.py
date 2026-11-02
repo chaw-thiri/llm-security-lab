@@ -12,7 +12,7 @@ def fetch(url):
 
 def main():
     root = Path("data/raw/external/bipia")
-    lock = Path("docs/bipia-source.json")
+    lock = Path("docs/records/bipia-source.json")
     previous = json.loads(lock.read_text()) if lock.exists() else None
     revision = previous["revision"] if previous else json.loads(fetch("https://api.github.com/repos/microsoft/BIPIA/commits/main"))["sha"]
     tree = json.loads(fetch(f"https://api.github.com/repos/microsoft/BIPIA/git/trees/{revision}?recursive=1"))

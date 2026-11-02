@@ -45,7 +45,7 @@ def run(device_name='mps'):
         fixed=read_json('runs/baseline-v1/models/full/best/detector.json')['threshold']
         report['arms'][arm]={'provenance':provenance,'policies':policies,'fixed_baseline_threshold':{k:metrics([r['label'] for r in rows],[r['score'] for r in rows],fixed) for k,rows in scores.items() if k!='validation'}}
         write_json(output/'comparison.json',report)
-    write_json("docs/threshold-analysis.json",report)
+    write_json("docs/records/threshold-analysis.json",report)
     write_compact_report("threshold-analysis")
     print('Saved compact threshold report and measured JSON',flush=True)
 if __name__=='__main__':

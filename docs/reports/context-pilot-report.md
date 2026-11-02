@@ -20,4 +20,4 @@ Do not promote either pilot. Recalibration alone lowered baseline original-test 
 
 The challenge has eight cases per label, correlated wrappers and one author. Original/application cases are inspected regression references.
 
-**Records:** [Measured record](context-pilot-results.json). [Frozen protocol](provenance/frozen-protocols.json), key `docs/context-pilot.md`. Detailed rationale and chronology: [research diary](../research_diary.md).
+**Records:** [Measured record](../records/context-pilot-results.json). [Frozen protocol](../provenance/frozen-protocols.json), key `docs/context-pilot.md`. Detailed rationale and chronology: [research diary](../../research_diary.md).

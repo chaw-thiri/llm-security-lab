@@ -52,7 +52,7 @@ def prepare():
    file=out/f'{name}.jsonl';write_jsonl(file,group);manifest['splits'][name]={'rows':len(group),'sha256':sha256(file)}
   write_json(out/'manifest.json',manifest)
   config=read_json('configs/full.json');config.update(data_dir=str(out),run_dir=f'runs/context-pilot-{arm}',epochs=1,encoder_lr=2e-6,head_lr=2e-6,initial_checkpoint='runs/baseline-v1/models/full/best',initial_weights_sha256='e64d9b21a4a81f0c00cc26ed0395480bdd2e912053395e8459f53a181097ac99')
-  write_json(f'configs/context-pilot-{arm}.json',config)
+  write_json(f'configs/context-pilot/{arm}.json',config)
  print('Prepared 1024 rows per arm, 64 optimizer updates each; shared validation; held-out synthetic challenge.')
 
 if __name__=='__main__':prepare()

@@ -21,4 +21,4 @@ Test cross-context consistency under a matched loss ablation with held-out wordi
 
 The probe is post-hoc and construction-labeled. Known domains are analysis metadata, not a validated router. Content and passage length still vary; the evidence does not isolate an internal attention mechanism.
 
-**Records:** [Measured record](domain-scoring-investigation.json). [Frozen protocol](provenance/frozen-protocols.json), key `docs/domain-scoring-protocol.md`. [Score-distribution figure](domain-scoring-distributions.png). Detailed rationale and chronology: [research diary](../research_diary.md).
+**Records:** [Measured record](../records/domain-scoring-investigation.json). [Frozen protocol](../provenance/frozen-protocols.json), key `docs/domain-scoring-protocol.md`. [Score-distribution figure](../figures/domain-scoring-distributions.png). Detailed rationale and chronology: [research diary](../../research_diary.md).

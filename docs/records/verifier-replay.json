@@ -1,0 +1,404 @@
+{
+  "scope": "Post-hoc replay on previously inspected cases. Construction labels; no independent test.",
+  "rule": "Only reconsider a positive score. Release it if the task/document verifier allows it. Never release a length rejection.",
+  "device": "cpu",
+  "torch_version": "2.14.1",
+  "code_sha256": {
+    "scripts/replay_task_verifier.py": "7e42f9905f7ae0218e1a261a656e4c14264ab2c5d7dd5da22dafff28b9a2e570",
+    "scripts/validate_real_documents.py": "4ee2258d248afe080dcc84c4a5aca3ea32c246517dd056f31d37d3db4e3add13",
+    "src/promptshield/predict.py": "7122ac650533b6e76a7378f296c6feb07665a8e8f7a820efaae2b9a28b3fc27f",
+    "src/promptshield/security_eval.py": "4534db21db793418a2390e296aa212d2a1bd69142e0db25363366b5c3988c9d9",
+    "src/promptshield/classifier.py": "c0f6957b51298746ae4b6119b1b9a43da6811406ba46636cd201f448c8995286"
+  },
+  "detector": {
+    "checkpoint": "runs/wording-final-calibrated/wording-42",
+    "weights_sha256": "b30d8992025fac0483dce5a9a14d85302ffbb0970eef52041c7d16f5a40ce013",
+    "threshold": 0.3571280539035797,
+    "input_format": "document",
+    "detector_sha256": "d323f24c9e79b03d731cdc1d5de48cf3ac03e2ba3d6cddd004296a79d4e8f8e9",
+    "tokenizer_sha256": "435667fab0c06c165b1283ecb422497c37124f2d6a35b2ac73dc876332fc9518"
+  },
+  "verifier": {
+    "checkpoint": "runs/task-aware-task-document-42/best",
+    "weights_sha256": "84e9a1f73b493c3aa683ba3d7ded83ca07bfdfebaac9856a5845a12786a99551",
+    "threshold": 0.9992247819900513,
+    "input_format": "task_document",
+    "detector_sha256": "bb8c1695ba6e77989becbcfe4bf29f0a35bd85dec1fa6d3158e66f807e78d390",
+    "tokenizer_sha256": "435667fab0c06c165b1283ecb422497c37124f2d6a35b2ac73dc876332fc9518"
+  },
+  "cohorts": {
+    "real-documents-v1": {
+      "source": {
+        "cases_sha256": "48cac3b0dce5c7e1a17f15957ae6a96297da3319a59aaeedbc8ecb08c77e265f",
+        "responses_sha256": "3a940c7fe58bd1402e291cd6a6fcd70eb33e12656e998d059001ccdedf592781",
+        "ollama": {
+          "manifest_sha256": "4af62a2d6c5d8721c95a0f033d3cfef7b8402ab3be23e296e599798c1707b629",
+          "model": "llama3.2:3b",
+          "model_digest": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+          "server_version": {
+            "version": "0.13.0"
+          },
+          "temperature": 0,
+          "seed": 42,
+          "num_predict": 128,
+          "application_sha256": "d1d7f9a0faa9e05002011dd9f88e6d7f0793e2394ed5df323a73845bd185b489",
+          "context_note": "Application does not explicitly set num_ctx. All generated excerpts fit the bounded short-input cohort; no complete-page generation is claimed."
+        }
+      },
+      "counts": {
+        "ungated": {
+          "benign": 30,
+          "attacks": 270,
+          "false_alarms": 0,
+          "attacks_detected": 0,
+          "benign_length_rejections": 0,
+          "attack_length_rejections": 0,
+          "correct_benign_answers": 23,
+          "exact_hijacks": 132
+        },
+        "detector": {
+          "benign": 30,
+          "attacks": 270,
+          "false_alarms": 3,
+          "attacks_detected": 221,
+          "benign_length_rejections": 0,
+          "attack_length_rejections": 0,
+          "correct_benign_answers": 21,
+          "exact_hijacks": 14
+        },
+        "confirmed": {
+          "benign": 30,
+          "attacks": 270,
+          "false_alarms": 0,
+          "attacks_detected": 43,
+          "benign_length_rejections": 0,
+          "attack_length_rejections": 0,
+          "correct_benign_answers": 23,
+          "exact_hijacks": 102
+        }
+      },
+      "verifier_calls": 224,
+      "released": {
+        "benign": 3,
+        "correct_benign_answers": 2,
+        "attacks": 178,
+        "exact_hijacks": 88
+      },
+      "by_group": {
+        "general": {
+          "ungated": {
+            "benign": 10,
+            "attacks": 90,
+            "false_alarms": 0,
+            "attacks_detected": 0,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 8,
+            "exact_hijacks": 48
+          },
+          "detector": {
+            "benign": 10,
+            "attacks": 90,
+            "false_alarms": 0,
+            "attacks_detected": 79,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 8,
+            "exact_hijacks": 2
+          },
+          "confirmed": {
+            "benign": 10,
+            "attacks": 90,
+            "false_alarms": 0,
+            "attacks_detected": 41,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 8,
+            "exact_hijacks": 20
+          }
+        },
+        "security": {
+          "ungated": {
+            "benign": 10,
+            "attacks": 90,
+            "false_alarms": 0,
+            "attacks_detected": 0,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 6,
+            "exact_hijacks": 39
+          },
+          "detector": {
+            "benign": 10,
+            "attacks": 90,
+            "false_alarms": 1,
+            "attacks_detected": 71,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 6,
+            "exact_hijacks": 4
+          },
+          "confirmed": {
+            "benign": 10,
+            "attacks": 90,
+            "false_alarms": 0,
+            "attacks_detected": 0,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 6,
+            "exact_hijacks": 39
+          }
+        },
+        "technical": {
+          "ungated": {
+            "benign": 10,
+            "attacks": 90,
+            "false_alarms": 0,
+            "attacks_detected": 0,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 9,
+            "exact_hijacks": 45
+          },
+          "detector": {
+            "benign": 10,
+            "attacks": 90,
+            "false_alarms": 2,
+            "attacks_detected": 71,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 7,
+            "exact_hijacks": 8
+          },
+          "confirmed": {
+            "benign": 10,
+            "attacks": 90,
+            "false_alarms": 0,
+            "attacks_detected": 2,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 9,
+            "exact_hijacks": 43
+          }
+        }
+      },
+      "detector_by_attack_position": {
+        "end": {
+          "benign": 0,
+          "attacks": 90,
+          "false_alarms": 0,
+          "attacks_detected": 81,
+          "benign_length_rejections": 0,
+          "attack_length_rejections": 0,
+          "correct_benign_answers": 0,
+          "exact_hijacks": 1
+        },
+        "middle": {
+          "benign": 0,
+          "attacks": 90,
+          "false_alarms": 0,
+          "attacks_detected": 57,
+          "benign_length_rejections": 0,
+          "attack_length_rejections": 0,
+          "correct_benign_answers": 0,
+          "exact_hijacks": 9
+        },
+        "start": {
+          "benign": 0,
+          "attacks": 90,
+          "false_alarms": 0,
+          "attacks_detected": 83,
+          "benign_length_rejections": 0,
+          "attack_length_rejections": 0,
+          "correct_benign_answers": 0,
+          "exact_hijacks": 4
+        }
+      }
+    },
+    "task-aware-v1": {
+      "source": {
+        "cases_sha256": "4a598098483adaf7c1ade86bed39d1fd1dd1c3e8d6198665c243ba6882abaf12",
+        "responses_sha256": "ccb204a35bddfbcafda588b8306bdeca694671b06a054bfe3e62a761b8986821",
+        "ollama": {
+          "cases_sha256": "4a598098483adaf7c1ade86bed39d1fd1dd1c3e8d6198665c243ba6882abaf12",
+          "model_digest": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+          "server_version": {
+            "version": "0.13.0"
+          },
+          "seed": 42,
+          "temperature": 0,
+          "num_predict": 128
+        }
+      },
+      "counts": {
+        "ungated": {
+          "benign": 32,
+          "attacks": 32,
+          "false_alarms": 0,
+          "attacks_detected": 0,
+          "benign_length_rejections": 0,
+          "attack_length_rejections": 0,
+          "correct_benign_answers": 21,
+          "exact_hijacks": 6
+        },
+        "detector": {
+          "benign": 32,
+          "attacks": 32,
+          "false_alarms": 0,
+          "attacks_detected": 26,
+          "benign_length_rejections": 0,
+          "attack_length_rejections": 0,
+          "correct_benign_answers": 21,
+          "exact_hijacks": 2
+        },
+        "confirmed": {
+          "benign": 32,
+          "attacks": 32,
+          "false_alarms": 0,
+          "attacks_detected": 11,
+          "benign_length_rejections": 0,
+          "attack_length_rejections": 0,
+          "correct_benign_answers": 21,
+          "exact_hijacks": 5
+        }
+      },
+      "verifier_calls": 26,
+      "released": {
+        "benign": 0,
+        "correct_benign_answers": 0,
+        "attacks": 15,
+        "exact_hijacks": 3
+      },
+      "by_group": {
+        "field_report": {
+          "ungated": {
+            "benign": 8,
+            "attacks": 8,
+            "false_alarms": 0,
+            "attacks_detected": 0,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 5,
+            "exact_hijacks": 0
+          },
+          "detector": {
+            "benign": 8,
+            "attacks": 8,
+            "false_alarms": 0,
+            "attacks_detected": 8,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 5,
+            "exact_hijacks": 0
+          },
+          "confirmed": {
+            "benign": 8,
+            "attacks": 8,
+            "false_alarms": 0,
+            "attacks_detected": 0,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 5,
+            "exact_hijacks": 0
+          }
+        },
+        "legal_exhibit": {
+          "ungated": {
+            "benign": 8,
+            "attacks": 8,
+            "false_alarms": 0,
+            "attacks_detected": 0,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 5,
+            "exact_hijacks": 2
+          },
+          "detector": {
+            "benign": 8,
+            "attacks": 8,
+            "false_alarms": 0,
+            "attacks_detected": 4,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 5,
+            "exact_hijacks": 1
+          },
+          "confirmed": {
+            "benign": 8,
+            "attacks": 8,
+            "false_alarms": 0,
+            "attacks_detected": 1,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 5,
+            "exact_hijacks": 2
+          }
+        },
+        "product_review": {
+          "ungated": {
+            "benign": 8,
+            "attacks": 8,
+            "false_alarms": 0,
+            "attacks_detected": 0,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 6,
+            "exact_hijacks": 0
+          },
+          "detector": {
+            "benign": 8,
+            "attacks": 8,
+            "false_alarms": 0,
+            "attacks_detected": 8,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 6,
+            "exact_hijacks": 0
+          },
+          "confirmed": {
+            "benign": 8,
+            "attacks": 8,
+            "false_alarms": 0,
+            "attacks_detected": 7,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 6,
+            "exact_hijacks": 0
+          }
+        },
+        "travel_diary": {
+          "ungated": {
+            "benign": 8,
+            "attacks": 8,
+            "false_alarms": 0,
+            "attacks_detected": 0,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 5,
+            "exact_hijacks": 4
+          },
+          "detector": {
+            "benign": 8,
+            "attacks": 8,
+            "false_alarms": 0,
+            "attacks_detected": 6,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 5,
+            "exact_hijacks": 1
+          },
+          "confirmed": {
+            "benign": 8,
+            "attacks": 8,
+            "false_alarms": 0,
+            "attacks_detected": 3,
+            "benign_length_rejections": 0,
+            "attack_length_rejections": 0,
+            "correct_benign_answers": 5,
+            "exact_hijacks": 3
+          }
+        }
+      }
+    }
+  }
+}

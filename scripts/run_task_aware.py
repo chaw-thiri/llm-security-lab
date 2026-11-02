@@ -16,7 +16,7 @@ def main():
         if status.exists() and read_json(status).get("status") == "complete":
             print("SKIP complete", arm, seed, flush=True)
             continue
-        config = f"configs/task-aware-{arm}-{seed}.json"
+        config = f"configs/task-aware/{arm}-{seed}.json"
         command = [sys.executable, "-m", "promptshield.train", "--config", config]
         if (run / "config.json").exists():
             command.append("--resume")

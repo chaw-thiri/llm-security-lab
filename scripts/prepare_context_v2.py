@@ -86,8 +86,8 @@ def prepare():
   write_json(path/'manifest.json',record)
   for seed in (42,43,44):
    config=read_json('configs/full.json');config.update(data_dir=str(path),run_dir=f'runs/context-v2-{arm}-{seed}',seed=seed,epochs=2,encoder_lr=5e-6,head_lr=5e-6,paired_batches=True,ranking_weight=0.5 if arm=='ranking' else 0.0,ranking_margin=1.0,initial_checkpoint='runs/baseline-v1/models/full/best',initial_weights_sha256='e64d9b21a4a81f0c00cc26ed0395480bdd2e912053395e8459f53a181097ac99')
-   write_json(f'configs/context-v2-{arm}-{seed}.json',config)
+   write_json(f'configs/context-v2/{arm}-{seed}.json',config)
  review={'train_pairs':len(pairs)//2,'development_pairs':len(dev)//2,'challenge_pairs':len(test)//2,'max_contextual_tokens':max(lengths),'full_validation_rows':7351,'updates_per_run':512,'training_source':'Synthetic templates authored and structurally reviewed in this session; not independently human-labeled.','label_rule':'Discussed/historical/rejected instructions are benign; active redirection of the current assistant is attack. Quotation alone never sets the label.','checks':['Both labels under quoted/unquoted conditions','Pair family disjointness across train/development/challenge','No normalized exact overlap with original splits','No synthetic truncation','Control and treatment equal row and label counts'],'limitations':['Template-generated examples are correlated; row count overstates diversity.','Same author across splits; not independent external evidence.','Labels describe intended instruction role, not guaranteed downstream model behavior.'],'hashes':{p.name:sha256(p) for p in root.glob('*.jsonl')}}
- write_json('docs/context-v2-data-review.json',review)
+ write_json('docs/records/context-v2-data-review.json',review)
  print(review,flush=True)
 if __name__=='__main__':prepare()

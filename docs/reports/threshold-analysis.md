@@ -23,4 +23,4 @@ Separate calibration changes from model learning in subsequent comparisons.
 
 Only 256 original benign validation cases are available; one error shifts empirical FPR by about 0.4 points. The eight-benign pilot challenge cannot validate a traffic-wide allowance.
 
-**Records:** [Measured record](threshold-analysis.json). Detailed rationale and chronology: [research diary](../research_diary.md).
+**Records:** [Measured record](../records/threshold-analysis.json). Detailed rationale and chronology: [research diary](../../research_diary.md).

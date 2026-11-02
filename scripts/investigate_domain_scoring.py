@@ -264,8 +264,8 @@ def plot(report):
         ax.set_ylabel("Log-odds transform of saved probability")
     axes[0].legend(loc="lower left", fontsize=9)
     fig.suptitle("Grounded seed 42: score separation and threshold transfer", fontsize=13)
-    fig.savefig("docs/domain-scoring-distributions.png", dpi=170)
-    svg = Path("docs/domain-scoring-distributions.svg")
+    fig.savefig("docs/figures/domain-scoring-distributions.png", dpi=170)
+    svg = Path("docs/figures/domain-scoring-distributions.svg")
     fig.savefig(svg)
     svg.write_text("\n".join(line.rstrip() for line in svg.read_text().splitlines())+"\n")
     plt.close(fig)
@@ -283,7 +283,7 @@ def main():
     os.environ.setdefault("MPLCONFIGDIR", str(Path.cwd()/".tmp/matplotlib"))
     OUT.mkdir(parents=True, exist_ok=True)
     manifest = read_json(DATA/"manifest.json")
-    study = read_json("docs/grounded-upgrade-results.json")
+    study = read_json("docs/records/grounded-upgrade-results.json")
     cases, hashes = {}, {}
     for split, filename in (("development", "development.jsonl"), ("fresh", "fresh-challenge.jsonl")):
         path = DATA/filename
@@ -291,14 +291,14 @@ def main():
         if hashes[split] != manifest["hashes"][filename]:
             raise ValueError("Frozen study cases changed")
         cases[split] = read_jsonl(path)
-    source_manifest = read_json("docs/real-document-source-manifest.json")
+    source_manifest = read_json("docs/records/real-document-source-manifest.json")
     sources = {r["id"]: r for r in source_manifest["sources"]}
     for source in {r["source_id"] for r in cases["development"] if r.get("source_id")}:
         if sha256(Path("data/raw/real-documents-v1")/(source+".txt")) != sources[source]["text_sha256"]:
             raise ValueError("Public source snapshot changed")
     cases["development"] = annotate_development(cases["development"])
     report = {"scope": "Exploratory investigation of already completed development/challenge results and controlled post-hoc public-text probes. No new generalization claim or tuned serving policy.",
-              "provenance": {"study_sha256": sha256("docs/grounded-upgrade-results.json"), "case_hashes": hashes,
+              "provenance": {"study_sha256": sha256("docs/records/grounded-upgrade-results.json"), "case_hashes": hashes,
                              "protocol_sha256": frozen_protocol_sha256("docs/domain-scoring-protocol.md"),
                              "analysis_script_sha256": sha256(__file__)},
               "models": {}, "probes": {}, "probe_clean": {}}
@@ -328,7 +328,7 @@ def main():
                     if (c["context_split"], c["domain"], c["condition"]) == (split, domain, "clean")]))
                 for split in ("development", "fresh") for domain in DOMAINS]
             print("Controlled inference complete:", name, flush=True)
-    write_json("docs/domain-scoring-investigation.json", report)
+    write_json("docs/records/domain-scoring-investigation.json", report)
     plot(report)
     write_report(report)
     write_json(OUT/"status.json", {"status": "complete", "models": list(report["models"]),

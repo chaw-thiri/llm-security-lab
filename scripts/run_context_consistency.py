@@ -111,7 +111,7 @@ def train_arm(arm,seed,development):
     run = Path(f"runs/context-consistency-{arm}-{seed}")
     status = run/"status.json"
     if not status.exists() or read_json(status)["status"] != "complete":
-        command = [sys.executable,"-m","promptshield.train","--config",f"configs/context-consistency-{arm}-{seed}.json"]
+        command = [sys.executable,"-m","promptshield.train","--config",f"configs/context-consistency/{arm}-{seed}.json"]
         if (run/"config.json").exists():
             command.append("--resume")
         subprocess.run(command,check=True)
@@ -164,7 +164,7 @@ def evaluate(manifest,references,runs):
         report["models"][name] = result
         write_json(OUT/"evaluation-progress.json",report)
         print(name,"FINAL",result["final"]["metrics"],flush=True)
-    write_json("docs/context-consistency-results.json",report)
+    write_json("docs/records/context-consistency-results.json",report)
     write_compact_report("context-consistency")
     write_json(OUT/"status.json",dict(status="complete",models=list(report["models"]),serving_default_changed=False))
 
@@ -185,12 +185,12 @@ def main():
     for split in ("train","validation","test"):
         if sha256(DATA/f"{split}.jsonl") != manifest["splits"][split]["sha256"]:
             raise ValueError("A frozen split changed")
-    audit = read_json("docs/context-consistency-semantic-audit.json")
+    audit = read_json("docs/records/context-consistency-semantic-audit.json")
     if audit["training_sha256"] != manifest["splits"]["train"]["sha256"] or not audit["assistant_semantic_audit_completed"] or audit["independent_human_review_completed"]:
         raise ValueError("Require the honest, completed assistant audit of these construction-labeled cases")
     execution = dict(data_manifest_sha256=sha256(DATA/"manifest.json"),protocol_sha256=manifest["protocol_sha256"],
                      code={p:sha256(p) for p in ("src/promptshield/train.py","src/promptshield/data.py","src/promptshield/consistency.py","scripts/prepare_context_consistency.py","scripts/run_context_consistency.py")},
-                     configs={f"{arm}-{seed}":sha256(f"configs/context-consistency-{arm}-{seed}.json") for arm in ("ce","consistent") for seed in (42,43,44)})
+                     configs={f"{arm}-{seed}":sha256(f"configs/context-consistency/{arm}-{seed}.json") for arm in ("ce","consistent") for seed in (42,43,44)})
     execution_path = OUT/"execution.json"
     if execution_path.exists() and read_json(execution_path) != execution:
         raise ValueError("Execution code/config changed; use a new study version")

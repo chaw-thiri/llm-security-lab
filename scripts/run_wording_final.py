@@ -14,7 +14,7 @@ from prepare_wording_final import DATA,OUT,DOMAINS,INITIAL,INITIAL_SHA
 # Reuse validated inference/alignment checks, with a separate study cache directory.
 ARMS = ("context","wording")
 SEEDS = (42,43,44)
-PROTOCOL = Path("docs/wording-final-protocol.json")
+PROTOCOL = Path("docs/records/wording-final-protocol.json")
 
 
 def gaps(predictions,cases):
@@ -118,14 +118,14 @@ def evaluate(manifest,runs,decision):
         c=result["final"]["metrics"]["confusion_matrix"]
         if sum(r["label"]==0 and r["predictions"][n]["prediction"]==1 for r in errors)!=c["fp"] or sum(r["label"]==1 and r["predictions"][n]["prediction"]==0 for r in errors)!=c["fn"]:
             raise AssertionError("Joined errors do not reproduce measured confusion matrix")
-    write_json("docs/wording-final-results.json",report)
+    write_json("docs/records/wording-final-results.json",report)
     render(report)
     write_json(OUT/"status.json",dict(status="complete",milestone_passed=report["milestone_passed"],serving_default_changed=False))
 
 
 def main():
     if (OUT/"status.json").exists() and read_json(OUT/"status.json")["status"]=="complete":
-        render(read_json("docs/wording-final-results.json"));return
+        render(read_json("docs/records/wording-final-results.json"));return
     inference.OUT = OUT
     OUT.mkdir(parents=True,exist_ok=True)
     os.environ["TMPDIR"]=str(Path.cwd()/".tmp");os.environ["PYTHONDONTWRITEBYTECODE"]="1"
@@ -133,12 +133,12 @@ def main():
     if sha256(PROTOCOL)!=manifest["protocol_sha256"]:raise ValueError("Protocol changed")
     for split in ("train","validation","calibration","test"):
         if sha256(DATA/f"{split}.jsonl")!=manifest["splits"][split]["sha256"]:raise ValueError("Frozen split changed")
-    audit=read_json("docs/wording-final-semantic-audit.json")
+    audit=read_json("docs/records/wording-final-semantic-audit.json")
     if audit["data_manifest_sha256"]!=sha256(DATA/"manifest.json") or not audit["assistant_semantic_audit_completed"] or audit["independent_human_review_completed"]:
         raise ValueError("Honest completed assistant audit required")
     execution=dict(data_manifest_sha256=sha256(DATA/"manifest.json"),protocol_sha256=sha256(PROTOCOL),
         code={p:sha256(p) for p in ("src/promptshield/train.py","src/promptshield/data.py","src/promptshield/wording.py","scripts/prepare_wording_final.py","scripts/run_wording_final.py","scripts/run_context_consistency.py")},
-        configs={f"{a}-{s}":sha256(f"configs/wording-final-{a}-{s}.json") for a in ARMS for s in SEEDS})
+        configs={f"{a}-{s}":sha256(f"configs/wording-final/{a}-{s}.json") for a in ARMS for s in SEEDS})
     path=OUT/"execution.json"
     if path.exists() and read_json(path)!=execution:raise ValueError("Execution changed; choose a new study version")
     write_json(path,execution)
@@ -148,7 +148,7 @@ def main():
             name=f"{arm}-{seed}";run=Path(f"runs/wording-final-{name}")
             write_json(OUT/"status.json",dict(status="training",arm=arm,seed=seed))
             if not (run/"status.json").exists() or read_json(run/"status.json")["status"]!="complete":
-                command=[sys.executable,"-m","promptshield.train","--config",f"configs/wording-final-{name}.json"]
+                command=[sys.executable,"-m","promptshield.train","--config",f"configs/wording-final/{name}.json"]
                 if (run/"config.json").exists():command.append("--resume")
                 subprocess.run(command,check=True)
             if read_json(run/"status.json")["status"]!="complete":raise RuntimeError("Paused/incomplete; final remains unscored")

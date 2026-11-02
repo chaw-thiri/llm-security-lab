@@ -23,7 +23,7 @@ def development(checkpoint):
 def train_arm(arm,seed):
     run=Path(f'runs/context-v2-{arm}-{seed}');status=run/'status.json'
     if not status.exists() or read_json(status)['status']!='complete':
-        cmd=[sys.executable,'-m','promptshield.train','--config',f'configs/context-v2-{arm}-{seed}.json']
+        cmd=[sys.executable,'-m','promptshield.train','--config',f'configs/context-v2/{arm}-{seed}.json']
         if (run/'config.json').exists():cmd+=['--resume']
         subprocess.run(cmd,check=True)
     if read_json(status)['status']!='complete':raise RuntimeError('Run paused or incomplete; stop study before evaluation.')

@@ -20,10 +20,10 @@ class ReportIntegrityTests(unittest.TestCase):
             self.assertEqual(frozen_protocol_sha256(identifier),record["sha256"])
         for name,identifier in (("grounded-upgrade-data.json","docs/grounded-upgrade-protocol.md"),
                                 ("context-consistency-data.json","docs/context-consistency-protocol.md")):
-            self.assertEqual(json.loads((ROOT/"docs"/name).read_text())["protocol_sha256"],frozen_protocol_sha256(identifier))
+            self.assertEqual(json.loads((ROOT/"docs/records"/name).read_text())["protocol_sha256"],frozen_protocol_sha256(identifier))
         for study in ("context-consistency","wording-final"):
             snapshot=json.loads((ROOT/f"docs/provenance/{study}-execution.json").read_text())
-            results=json.loads((ROOT/f"docs/{study}-results.json").read_text())
+            results=json.loads((ROOT/f"docs/records/{study}-results.json").read_text())
             self.assertEqual(snapshot["execution_sha256"],results["execution_sha256"])
             for name,record in snapshot["files"].items():
                 self.assertEqual(hashlib.sha256(record["content_utf8"].encode()).hexdigest(),record["sha256"],name)
@@ -38,7 +38,7 @@ class ReportIntegrityTests(unittest.TestCase):
                 frozen_protocol_sha256(key,path)
 
     def test_reports_are_compact_and_leave_measured_json_unchanged(self):
-        inputs={p:hashlib.sha256(p.read_bytes()).hexdigest() for p in (ROOT/"docs").glob("*.json")}
+        inputs={p:hashlib.sha256(p.read_bytes()).hexdigest() for p in (ROOT/"docs").rglob("*.json")}
         for study in REPORTS:
             text=build_report(study)
             self.assertLessEqual(len(text.split()),650,study)
@@ -49,7 +49,7 @@ class ReportIntegrityTests(unittest.TestCase):
         write_all_reports(check=True)
 
     def test_public_markdown_links_resolve(self):
-        paths=[ROOT/"README.md",ROOT/"contribution.md",ROOT/"research_diary.md"]+list((ROOT/"docs").glob("*.md"))
+        paths=[ROOT/"README.md",ROOT/"contribution.md",ROOT/"research_diary.md"]+list((ROOT/"docs").rglob("*.md"))
         for path in paths:
             for target in re.findall(r"!?\[[^\]]*\]\(([^)]+)\)",path.read_text()):
                 if target.startswith(("https://","http://","#","mailto:")):

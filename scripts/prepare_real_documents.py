@@ -19,7 +19,7 @@ from promptshield.data import normalized
 
 RAW = Path("data/raw/real-documents-v1")
 ROOT = Path("data/splits/real-documents-v1")
-PLAN = Path("configs/real-document-sources.json")
+PLAN = Path("configs/real-document/sources.json")
 PROTOCOL = Path("docs/real-document-validation-protocol.md")
 CHECKPOINTS = {"baseline": "runs/baseline-v1/models/full/best", "document-42": "runs/task-aware-document-42/best"}
 PAYLOADS = (
@@ -201,7 +201,7 @@ def main():
                                "Only factual QA assessed; full pages and length rejections reported separately.",
                                "Exact text overlap screened against legacy splits; semantic or pretrained exposure not ruled out."]}
     write_json(ROOT/"manifest.json", manifest)
-    write_json("docs/real-document-source-manifest.json", manifest)
+    write_json("docs/records/real-document-source-manifest.json", manifest)
     print(json.dumps({"counts":manifest["counts"],"max_excerpt_tokens":max(lengths),"full_pages_over_512":sum(r["full_tokens"]>512 for r in records)},indent=2),flush=True)
 
 

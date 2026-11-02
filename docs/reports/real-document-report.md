@@ -22,4 +22,4 @@ Restrict release claims to an experimental short-input research prototype. Retai
 
 Attacks are constructed copies, not naturally occurring malicious files. Strict QA preserves **23/30** ungated successes but rejects some valid paraphrases; it is not factual accuracy. Labels/keys lack independent human review. Full-page generation quality was not measured.
 
-**Records:** [Measured record](real-document-results.json). [Frozen protocol](provenance/frozen-protocols.json), key `docs/real-document-validation-protocol.md`. [Source manifest](real-document-source-manifest.json). Detailed rationale and chronology: [research diary](../research_diary.md).
+**Records:** [Measured record](../records/real-document-results.json). [Frozen protocol](../provenance/frozen-protocols.json), key `docs/real-document-validation-protocol.md`. [Source manifest](../records/real-document-source-manifest.json). Detailed rationale and chronology: [research diary](../../research_diary.md).

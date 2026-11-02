@@ -36,7 +36,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--split", default="data/splits/piguard-v1/train.jsonl")
     parser.add_argument("--backbone", default="data/raw/piguard/backbone")
-    parser.add_argument("--output", default="docs/token-length-profile.json")
+    parser.add_argument("--output", default="docs/records/token-length-profile.json")
     args = parser.parse_args()
     profile(args.split, args.backbone, args.output)
 

@@ -123,7 +123,7 @@ def main():
                                "flagged_at_own_threshold": sum(r["flagged_at_checkpoint_threshold"] for r in group),
                                "fpr_at_own_threshold": sum(r["flagged_at_checkpoint_threshold"] for r in group) / len(group)}
         report["models"][name] = result
-        write_json("docs/notinject-evaluation.json", report)
+        write_json("docs/records/notinject-evaluation.json", report)
         print(name, result["flagged_at_own_threshold"], "/", len(eligible),
               f"({result['false_positive_rate_at_own_threshold']:.1%})", flush=True)
         del model

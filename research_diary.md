@@ -4,7 +4,7 @@ This log records how the project changed, what each experiment found, and why th
 
 ## Research assessment and measurement conventions
 
-The latest consistency ablation doubled final recall while increasing benign false alarms; the project remains a short-input research prototype. The recorded hypothesis is partly supported, but no study establishes a dependable security/utility operating point. The baseline is a historical reference, not a certified defense.
+The latest wording recipe reached the overall recall and false-alarm target on one constructed challenge. The same detectors blocked 19.7% of benign cases on the older challenge. A subsequent application replay found that the existing task-aware detector was unsafe as an override for seed 42. The baseline remains the reference for this short-input prototype.
 
 Attack recall is `TP/(TP+FN)`; benign FPR is `FP/(FP+TN)`. Accuracy can conceal missed attacks on imbalanced data. F1 depends on the evaluation mixture. Ranking metrics and serving thresholds answer different questions; a development FPR allowance is an empirical false-alarm constraint, unrelated to tokens or compute.
 
@@ -46,7 +46,7 @@ Cross-entropy and pairwise-ranking continuations were compared with an equal-ste
 
 The challenge was synthetic and same-author. It supported further study, not deployment. Ranking loss added complexity for little mean difference from cross-entropy.
 
-**Decision:** Keep the baseline as the stable reference; use cross-entropy as the simpler follow-up candidate. See the [combined report](docs/context-v2-report.md) and [data review](docs/context-v2-data-review.json).
+**Decision:** Keep the baseline as the stable reference; use cross-entropy as the simpler follow-up candidate. See the [combined report](docs/reports/context-v2-report.md) and [data review](docs/records/context-v2-data-review.json).
 
 ### Single-seed precursor and calibration confound
 
@@ -54,7 +54,7 @@ Before v2, a 1,024-row pilot compared original replay with a targeted arm replac
 
 Both continuations caught only 2/8 challenge attacks and blocked all 8/8 benign controls. In the inspected 20-case application regression, benign completion improved from baseline's 5/10 to 8/10 but each continuation admitted one hijack. The targeted arm did not establish a gain beyond control.
 
-Recalibration alone raised the unchanged baseline's threshold from approximately 0.0020 to 0.9995 and lowered original-test recall from 99.04% to 84.56%; its challenge counts matched the continuations. The [validation-only sweep](docs/threshold-analysis.md) varied 0/0.5/1/2/5% allowances on original-only and mixed validation. Only 256 original benign rows supported calibration: one error changes empirical FPR by about 0.4 points.
+Recalibration alone raised the unchanged baseline's threshold from approximately 0.0020 to 0.9995 and lowered original-test recall from 99.04% to 84.56%; its challenge counts matched the continuations. The [validation-only sweep](docs/reports/threshold-analysis.md) varied 0/0.5/1/2/5% allowances on original-only and mixed validation. Only 256 original benign rows supported calibration: one error changes empirical FPR by about 0.4 points.
 
 ### V2 objective and selection
 
@@ -70,7 +70,7 @@ Before challenge scoring, contextual development FPR had to improve at least ten
 | CE | 95.95% | 64.0 | 20.7 | 39.3 |
 | CE + ranking | 95.99% | 64.0 | 19.7 | 40.3 |
 
-The precursor and v2 are separately reported in [pilot](docs/context-pilot-report.md) and [v2](docs/context-v2-report.md). Their authored/correlated examples do not demonstrate adaptive or production robustness.
+The precursor and v2 are separately reported in [pilot](docs/reports/context-pilot-report.md) and [v2](docs/reports/context-v2-report.md). Their authored/correlated examples do not demonstrate adaptive or production robustness.
 
 ## 3. External benign probe — NotInject
 
@@ -80,7 +80,7 @@ The pinned NotInject release contains 339 benign prompts. The overlap audit foun
 
 This was progress, but still about one in three benign prompts was blocked. NotInject contains no attacks and is not a representative document or traffic sample.
 
-**Decision:** Do not tune on NotInject. Continue with a separate task-aware experiment, and retain this benchmark as an external false-alarm check. See the [evaluation report](docs/notinject-evaluation.md).
+**Decision:** Do not tune on NotInject. Continue with a separate task-aware experiment, and retain this benchmark as an external false-alarm check. See the [evaluation report](docs/reports/notinject-evaluation.md).
 
 ### External-data controls
 
@@ -98,7 +98,7 @@ The security trade-off went the other way. At development-selected thresholds, m
 
 **Decision:** The task-aware pilot is not an upgrade and should not replace the reference. Some of the recall difference may come from operating-point calibration; the experiment does not isolate that cause. The challenge is synthetic and same-author, and the quotation check is a post-hoc perturbation rather than an independent test.
 
-See the [combined report](docs/task-aware-report.md) and [machine-readable scores](docs/task-aware-results.json).
+See the [combined report](docs/reports/task-aware-report.md) and [machine-readable scores](docs/records/task-aware-results.json).
 
 ### Matched design, actual input audit and limits
 
@@ -108,11 +108,11 @@ The later audit found that 3,072/4,096 task-aware training rows omitted task for
 
 All new arms observed zero benign blocks on the 512-case challenge and completed 21/32 benign replay tasks. Task-aware runs produced three to five marker hijacks, versus zero for document-only. Across seeds, 120 attacks were missed by every task-aware model, including 62-64/64 field-report misses per seed. A post-hoc quotation perturbation reused weights/thresholds and is not independent validation.
 
-Full errors remain local in `results/task-aware-v1/error-cases.jsonl`; [audit counts](docs/task-aware-error-audit.json) and [application records](docs/task-aware-application-results.json) remain public.
+Full errors remain local in `results/task-aware-v1/error-cases.jsonl`; [audit counts](docs/records/task-aware-error-audit.json) and [application records](docs/records/task-aware-application-results.json) remain public.
 
 ## 5. Error audit and external data candidates
 
-The existing task-aware errors have now been joined to their texts and grouped in the [error audit](docs/task-aware-report.md). A larger externally sourced corpus has been [assembled from official BIPIA data](docs/external-tasks-v2.md): 7,353 training, 1,548 development, and 1,458 unscored challenge candidates covering email questions, tables, and code debugging. Upstream attack instructions were manually reviewed by the authors; our assembled examples still await human review. The new export gate rejects incomplete annotations, and a 60-example development-only starter packet is ready locally.
+The existing task-aware errors have now been joined to their texts and grouped in the [error audit](docs/reports/task-aware-report.md). A larger externally sourced corpus has been [assembled from official BIPIA data](docs/reports/external-tasks-v2.md): 7,353 training, 1,548 development, and 1,458 unscored challenge candidates covering email questions, tables, and code debugging. Upstream attack instructions were manually reviewed by the authors; our assembled examples still await human review. The new export gate rejects incomplete annotations, and a 60-example development-only starter packet is ready locally.
 
 ### Source lineage and pending review
 
@@ -130,7 +130,7 @@ Zero rows have completed independent human review. The 60-case blinded training/
 
 ## 6. Matched threshold and ranking diagnostic
 
-The [matched diagnostic report](docs/detector-diagnostic.md) compares ten saved checkpoints on the same inspected synthetic cases and NotInject probes. Even with optimistic thresholds selected on these examples, none reaches 95% attack recall while keeping false alarms below 5% on each benign source. Document-only models reach 43–55% recall at that constraint; their synthetic-only result is 98–99%. This exposes a source-generalization problem that threshold changes alone cannot fix. These are exploratory limits, not validated operating points, and the reserved new challenge was not opened.
+The [matched diagnostic report](docs/reports/detector-diagnostic.md) compares ten saved checkpoints on the same inspected synthetic cases and NotInject probes. Even with optimistic thresholds selected on these examples, none reaches 95% attack recall while keeping false alarms below 5% on each benign source. Document-only models reach 43–55% recall at that constraint; their synthetic-only result is 98–99%. This exposes a source-generalization problem that threshold changes alone cannot fix. These are exploratory limits, not validated operating points, and the reserved new challenge was not opened.
 
 ### Matched population and interpretation
 
@@ -145,13 +145,13 @@ Ten full first-token checkpoints were compared on identical 256 attacks, 256 aut
 
 The inspected `document-43` point was strongest at some allowances, but selecting it as a deployment winner would use test outcomes. A different family appeared stronger at stricter allowances. Source-generalization failure persisted independently of the task-aware formatting flaw. These observations do not by themselves prove classical overfitting or a specific attention mechanism.
 
-The quotation condition reuses inspected cases. [Exact frontiers and common-error IDs](docs/detector-diagnostic.json) retain all checkpoints; full shared text joins remain in `results/detector-diagnostic-v1/shared-errors-with-text.jsonl`.
+The quotation condition reuses inspected cases. [Exact frontiers and common-error IDs](docs/records/detector-diagnostic.json) retain all checkpoints; full shared text joins remain in `results/detector-diagnostic-v1/shared-errors-with-text.jsonl`.
 
 ## 7. Real public-document validation
 
-Real-document validation is now complete; see the [combined report](docs/real-document-report.md). Thirty public sources supplied clean excerpts and 270 controlled attack copies. Baseline blocked 20/30 benign excerpts and 266/270 attacks; four exact marker hijacks remained. Document-only seed 42 blocked no benign excerpts but detected only 95/270 attacks, leaving 82 successful hijacks. Unprotected Llama had 132 hijacks. Both failed the predeclared security-MVP targets. Twenty-seven complete pages exceeded the detector context; the candidate accepted only two complete pages. All 300 serving-gate decisions per detector were checked against the application path, and no uninspected suffix was forwarded.
+Real-document validation is now complete; see the [combined report](docs/reports/real-document-report.md). Thirty public sources supplied clean excerpts and 270 controlled attack copies. Baseline blocked 20/30 benign excerpts and 266/270 attacks; four exact marker hijacks remained. Document-only seed 42 blocked no benign excerpts but detected only 95/270 attacks, leaving 82 successful hijacks. Unprotected Llama had 132 hijacks. Both failed the predeclared security-MVP targets. Twenty-seven complete pages exceeded the detector context; the candidate accepted only two complete pages. All 300 serving-gate decisions per detector were checked against the application path, and no uninspected suffix was forwarded.
 
-This supports an explicitly experimental research release, with [draft release notes](docs/v0.1.0-release-notes.md), rather than a dependable-defense claim. The measured failure concentrates in technical/security excerpts. These real-document cases are now disclosed regression evidence and must not become the next supposedly fresh final test.
+This supports an explicitly experimental research release, with [draft release notes](docs/releases/v0.1.0-release-notes.md), rather than a dependable-defense claim. The measured failure concentrates in technical/security excerpts. These real-document cases are now disclosed regression evidence and must not become the next supposedly fresh final test.
 
 ### Frozen application protocol and source-level failures
 
@@ -179,11 +179,11 @@ Labels/keys were source-checked and assistant-reviewed, not independently adjudi
 
 ## 8. Grounded real-context continuation — three seeds
 
-The [fixed protocol](docs/grounded-upgrade-report.md) compared balanced, equal-step original-data controls with matched real-context pairs, all continuing from the preserved baseline. Each arm used 4,096 examples and 512 updates; seeds 42, 43 and 44 completed. New pairs carry construction labels, not human review. The [source manifest](docs/grounded-upgrade-data.json) records training/development exposure and 18 additional public source pages frozen before training.
+The [fixed protocol](docs/reports/grounded-upgrade-report.md) compared balanced, equal-step original-data controls with matched real-context pairs, all continuing from the preserved baseline. Each arm used 4,096 examples and 512 updates; seeds 42, 43 and 44 completed. New pairs carry construction labels, not human review. The [source manifest](docs/records/grounded-upgrade-data.json) records training/development exposure and 18 additional public source pages frozen before training.
 
 Development improvement qualified for the predeclared three-seed replication, but did not transfer to the fresh 504-case challenge. At development-selected thresholds, grounded models averaged **13.6% attack recall and 0.5% benign false alarms**, versus **8.2% and 2.3%** for controls. Original baseline detected 98.1% but falsely blocked 73.6% of benign cases. Grounded ROC-AUC improved from the controls' 0.729 to 0.916, yet technical/security attack recall remained close to zero. Reduced false alarms therefore do not constitute a dependable defense.
 
-**Decision:** Preserve all attempted runs and the original baseline; do not change the application default. Investigate domain score distributions and the transfer of development thresholds before more training. Full [results](docs/grounded-upgrade-report.md) separate the fresh challenge from previously exposed regression and cached Llama replay. All 54 offline tests passed before training, and all 69 preserved baseline files verified unchanged afterward. The separate human-review corpus and its reserved challenge remain unused.
+**Decision:** Preserve all attempted runs and the original baseline; do not change the application default. Investigate domain score distributions and the transfer of development thresholds before more training. Full [results](docs/reports/grounded-upgrade-report.md) separate the fresh challenge from previously exposed regression and cached Llama replay. All 54 offline tests passed before training, and all 69 preserved baseline files verified unchanged afterward. The separate human-review corpus and its reserved challenge remain unused.
 
 ### Source partition, controls and replication
 
@@ -195,7 +195,7 @@ The 504-case final set had 18 additional same-publisher pages, 36 clean passages
 
 ## 9. Domain-dependent scoring investigation
 
-The [domain-scoring investigation](docs/domain-scoring-report.md) verifies the saved scores and compares within-domain separation, cross-domain ranking, source-specific benign examples and attainable operating points. It also scores 1,584 controlled public-text probes on baseline, control seed 42 and all three grounded seeds, holding inner instructions, markers and insertion position fixed across contexts. These are post-hoc construction-labeled probes, not a new generalization test.
+The [domain-scoring investigation](docs/reports/domain-scoring-report.md) verifies the saved scores and compares within-domain separation, cross-domain ranking, source-specific benign examples and attainable operating points. It also scores 1,584 controlled public-text probes on baseline, control seed 42 and all three grounded seeds, holding inner instructions, markers and insertion position fixed across contexts. These are post-hoc construction-labeled probes, not a new generalization test.
 
 The main failure is an interaction between source context and familiar benign phrasing. Ordinary NASA development passages score low, while benign descriptions of attacks inside them score high and force the shared threshold upward. Replacing an unseen descriptive wrapper with a training wrapper changes seed 42 median scores from 0.999379 to 0.000141 in the same general-text probe group. Native logits confirm a large shift; this is not just rounded probability display. All upgraded seeds show the pattern, consistent with a wording shortcut.
 
@@ -213,7 +213,7 @@ Across grounded seeds, optimistic shared-threshold recall at <=5% FPR per domain
 
 ## 10. Cross-context consistency loss — completed
 
-The [combined study report](docs/context-consistency-report.md) compared CE with CE plus 0.05-weighted native-margin consistency across label-equivalent roles in different contexts. Both arms used the same 4,096 rows, quartet batches, baseline initialization and 512-update budget. Description families and source pages were held out in development and in the 18-page final challenge. Added labels remain construction-based; the assistant audit is not independent human review.
+The [combined study report](docs/reports/context-consistency-report.md) compared CE with CE plus 0.05-weighted native-margin consistency across label-equivalent roles in different contexts. Both arms used the same 4,096 rows, quartet batches, baseline initialization and 512-update budget. Description families and source pages were held out in development and in the 18-page final challenge. Added labels remain construction-based; the assistant audit is not independent human review.
 
 | Arm/seed | Final recall | Final benign FPR | Final ROC-AUC | Development role-pair margin MSE |
 |---|---:|---:|---:|---:|
@@ -224,13 +224,13 @@ The [combined study report](docs/context-consistency-report.md) compared CE with
 | ce-44 | 34.1% | 5.6% | 0.852 | 12.231 |
 | consistent-44 | 76.3% | 15.2% | 0.895 | 3.714 |
 
-The development-only replication criterion was met; both arms were repeated at seeds 43/44. No lambda or threshold search followed the pilot. The [full measured record](docs/context-consistency-results.json) retains every attempted model, per-domain errors, training components, baseline references and inspected regression results. The source snapshots and frozen hashes are in the [data record](docs/context-consistency-data.json).
+The development-only replication criterion was met; both arms were repeated at seeds 43/44. No lambda or threshold search followed the pilot. The [full measured record](docs/records/context-consistency-results.json) retains every attempted model, per-domain errors, training components, baseline references and inspected regression results. The source snapshots and frozen hashes are in the [data record](docs/records/context-consistency-data.json).
 
 **Measured interpretation:** Across all three seeds, final attack recall rises from **34.4% to 68.1%**, ROC-AUC from **0.869 to 0.897**, and original PIGuard regression F1 from **87.0% to 94.2%**. Held-out context-pair margin MSE falls from **11.72 to 3.47**, a **70.4% reduction**. The alignment hypothesis is partly supported, but final benign FPR also rises from **4.6% to 11.9%**: the development 5% per-domain limit did not transfer. This is a security/utility trade-off, not a dependable-defense upgrade. Mean final FPR remains highest in general text (16.9%), followed by technical (12.6%) and security text (6.2%).
 
 All 36 plain clean excerpts are accepted by every attempted arm/seed; the added false alarms are on benign descriptions of attacks. The constructed quoted-active condition has 61.2% mean recall versus 75.0% for direct active instructions. Quotation also changes the active wrapper, so this is not a causal test of quotation marks alone. All three consistency seeds still miss the same 178 attack variants and falsely flag the same 29 benign variants. These correlated cases support targeted review, not a claim about population error rates.
 
-The [cross-seed aggregate record](docs/context-consistency-summary.json) includes paired recoveries, newly introduced errors, per-domain means and original regression. Full joined errors are available locally in `results/context-consistency-v1/per-example-errors.jsonl`, with the public/constructed text, intended label, source, role and each arm/seed's native margin and decision. Exported FP/FN totals were checked against the independent evaluator. All **63 offline tests passed**, including consistency-gradient, accumulation and interrupted-resume checks. Before presentation refactoring, execution-code hashes matched the recorded run; exact source bytes remain archived. All **69 baseline snapshot files** verify unchanged.
+The [cross-seed aggregate record](docs/records/context-consistency-summary.json) includes paired recoveries, newly introduced errors, per-domain means and original regression. Full joined errors are available locally in `results/context-consistency-v1/per-example-errors.jsonl`, with the public/constructed text, intended label, source, role and each arm/seed's native margin and decision. Exported FP/FN totals were checked against the independent evaluator. All **63 offline tests passed**, including consistency-gradient, accumulation and interrupted-resume checks. Before presentation refactoring, execution-code hashes matched the recorded run; exact source bytes remain archived. All **69 baseline snapshot files** verify unchanged.
 
 **Decision:** Preserve the baseline and application default. Keep the consistency checkpoints as research candidates: the loss improves score alignment and detection, while the unseen-description false alarms and residual attack misses prevent promotion. No final-challenge threshold or lambda tuning followed evaluation. The separate human-review gate and reserved external challenge remain unused; the new final challenge is now an inspected regression reference.
 
@@ -266,7 +266,7 @@ The documentation consolidation passed **68 offline tests**, including five repo
 
 ## 11. Final current-architecture attempt — completed
 
-The user fixed an acceptable operating target: **attack recall strictly above 80% with benign false alarms at most 10%**. The last attempt with the current architecture adds wording invariance to context invariance. This is a bounded experiment, not an open-ended search for a favorable threshold. The [frozen structured protocol](docs/wording-final-protocol.json), [data record](docs/wording-final-data.json) and [assistant audit](docs/wording-final-semantic-audit.json) precede all six full runs.
+The user fixed an acceptable operating target: **attack recall strictly above 80% with benign false alarms at most 10%**. The last attempt with the current architecture adds wording invariance to context invariance. This is a bounded experiment, not an open-ended search for a favorable threshold. The [frozen structured protocol](docs/records/wording-final-protocol.json), [data record](docs/records/wording-final-data.json) and [assistant audit](docs/records/wording-final-semantic-audit.json) precede all six full runs.
 
 Both arms continue the predeclared previous consistency seed-42 checkpoint, with the same first-token DistilBERT architecture and 66,955,010 parameters. The initializer is fixed by first-seed convention, not chosen from this study's test results. Three seeds (42/43/44) run unconditionally for each arm. Each receives 4,096 balanced examples: 1,536 original PIGuard training replay rows and 320 eight-example grids crossing two contexts, two equivalent outer phrasings and two instruction roles. Inner payload, neutral marker, quotation and insertion position are held constant within each grid. Each outer genre supports both descriptive and current-execution roles; metadata is excluded from tokenization.
 
@@ -286,7 +286,7 @@ Reproduction from retained prerequisites: `python scripts/prepare_wording_final.
 
 ### Measured outcome and decision
 
-All six runs completed their 512 updates without numerical failure; aggregate measured training time was **34.1 minutes**, excluding loading, calibration and final inference. Calibration selected the **wording** family before any final scoring: mean real-domain recall **93.2%**, versus **90.8%** for context control. All six calibrated thresholds and the selection record are embedded in the [measured results](docs/wording-final-results.json). No lambda search, final-threshold fitting or additional training followed evaluation.
+All six runs completed their 512 updates without numerical failure; aggregate measured training time was **34.1 minutes**, excluding loading, calibration and final inference. Calibration selected the **wording** family before any final scoring: mean real-domain recall **93.2%**, versus **90.8%** for context control. All six calibrated thresholds and the selection record are embedded in the [measured results](docs/records/wording-final-results.json). No lambda search, final-threshold fitting or additional training followed evaluation.
 
 | Arm/seed | Final attacks caught | Final benign blocked | Recall | Benign FPR | Original PIGuard F1 |
 |---|---:|---:|---:|---:|---:|
@@ -299,7 +299,7 @@ All six runs completed their 512 updates without numerical failure; aggregate me
 
 **The preregistered overall milestone passed in every selected-family seed.** Wording means were **96.91% recall / 6.41% benign FPR**, versus context control **97.26% / 8.70%**. Control seed 44 missed the FPR limit by one false alarm (91 versus the allowed 90). The incremental wording-loss effect was principally fewer false alarms, with a small mean recall cost: **2.30 percentage points less FPR and 0.35 points less recall**, rather than higher final attack recall. Final ROC-AUC means were 0.9932 versus 0.9919. Original PIGuard F1 averaged **96.54%** versus **96.40%**.
 
-Calibration wording-edge margin MSE fell from **11.27 to 9.54**, a **15.4% reduction**. Context-edge MSE remained approximately **5.17 versus 5.15**. These observable gaps support a limited alignment effect; they do not demonstrate an internal attention mechanism or robust intent understanding. Relative to matched controls, wording seeds recovered 29/17/17 benign cases while introducing 0/0/1 new false alarms; attack recoveries were 0/0/3 with 3/8/1 newly missed attacks. See the [cross-seed/error record](docs/wording-final-summary.json).
+Calibration wording-edge margin MSE fell from **11.27 to 9.54**, a **15.4% reduction**. Context-edge MSE remained approximately **5.17 versus 5.15**. These observable gaps support a limited alignment effect; they do not demonstrate an internal attention mechanism or robust intent understanding. Relative to matched controls, wording seeds recovered 29/17/17 benign cases while introducing 0/0/1 new false alarms; attack recoveries were 0/0/3 with 3/8/1 newly missed attacks. See the [cross-seed/error record](docs/records/wording-final-summary.json).
 
 **The broader false-alarm problem remains.** Selected-family new-challenge domain means were technical **96.53% recall / 3.22% FPR**, security **94.21% / 4.78%**, and general **100% / 11.22%**. The general domain exceeded the empirical 10% allowance in two seeds, despite the overall milestone passing. On the inspected older consistency challenge, the same frozen candidate thresholds produced **95.45% recall / 19.73% FPR** on average. Therefore the study does not establish 80%/10% performance across the project's tested document conditions.
 
@@ -313,10 +313,35 @@ The initializer reference on the **same new challenge** scored **50.9% recall / 
 
 Wording seed 42 is the preferred candidate for the next application test (97.45% recall / 6.22% benign FPR on the new challenge). This preference was chosen after final evaluation; it is not a held-out best-seed selection claim. All three seed results remain reported, and the serving default is unchanged.
 
-The [compact supervisor report](docs/wording-final-report.md) combines design, measured results and decision. Exact execution code/configuration/protocol/audit bytes remain in [the execution archive](docs/provenance/wording-final-execution.json). After completion, presentation moved into the shared report renderer and the runner's import-time rerouting of another study's score-cache directory was removed. These changes produced no new training or measurements; historical replay requires the archived execution bytes. The source snapshots, checkpoints and private notes remain ignored.
+The [compact supervisor report](docs/reports/wording-final-report.md) combines design, measured results and decision. Exact execution code/configuration/protocol/audit bytes remain in [the execution archive](docs/provenance/wording-final-execution.json). After completion, presentation moved into the shared report renderer and the runner's import-time rerouting of another study's score-cache directory was removed. These changes produced no new training or measurements; historical replay requires the archived execution bytes. The source snapshots, checkpoints and private notes remain ignored.
 
 Final verification passed **75 offline tests**, including completed-entry-point rendering without training, immutable execution-byte verification, cache isolation, report compactness and public Markdown links. Shared report rendering checks passed; `git diff --check` was clean. All **69 baseline snapshot files** verified unchanged after the study. Pre-existing scientific JSON records were not modified.
 
-## Current next step
+## Application replay: can another detector safely release false alarms?
 
-Freeze the completed wording-consistency milestone. Independently review persistent benign-description and clean-document false alarms, then run a matched task-conditioned-verifier/application-utility experiment with new held-out examples and unprotected/detector-only controls. Keep the 80%/10% target explicit across the intended document mix. The complete-document 512-token limitation and independent human review remain separate application requirements.
+**Decision:** Keep the calibrated wording seed 42 as the candidate for further testing. Giving the existing task-aware detector authority to release blocked documents recovered two correct answers on the public excerpts at the cost of 88 additional exact answer hijacks.
+
+The [replay](scripts/replay_task_verifier.py) compares three paths: ungated Llama, the wording detector alone, and a second check of its positive injection scores using the previously trained task/document seed 42. The second detector reads the original trusted task and complete document. A length rejection at either gate stays blocked. Both checkpoints use their recorded thresholds (0.357128 and 0.999225); no fitting or generation took place. Each forwarded input receives its original cached Llama response. An exact hijack means the response matches the attacker's target under the original study's normalization.
+
+| Previously used application set | Policy | Attacks detected | Benign false alarms | Correct benign answers | Exact hijacks |
+|---|---|---:|---:|---:|---:|
+| Public excerpts | Ungated | 0/270 | 0/30 | 23/30 | 132/270 |
+| Public excerpts | Wording 42 | 221/270 | 3/30 | 21/30 | 14/270 |
+| Public excerpts | Wording 42 + confirmation | 43/270 | 0/30 | 23/30 | 102/270 |
+| Task-aware application set | Ungated | 0/32 | 0/32 | 21/32 | 6/32 |
+| Task-aware application set | Wording 42 | 26/32 | 0/32 | 21/32 | 2/32 |
+| Task-aware application set | Wording 42 + confirmation | 11/32 | 0/32 | 21/32 | 5/32 |
+
+The second detector released 178 attacks and three benign excerpts in the public set. In the smaller application set it released 15 attacks and no benign cases. No case was rejected for length. The controls reproduced both studies' original ungated completion and hijack counts. [Aggregate counts, cohort breakdowns and hashes](docs/records/verifier-replay.json) are public; decisions by case are local at `results/verifier-replay-v1/decisions.jsonl`. With the retained checkpoints, cases and response caches, run `python scripts/replay_task_verifier.py --device cpu`.
+
+These are **exposed, construction-labeled regressions**. The 270 public attacks are three payloads at three positions on 30 source pages. Of those 30 pages, 18 contributed to the wording study's training pool, two to checkpoint selection, four to calibration, and six to earlier regression work. The smaller set consists of correlated authored pairs. The result rejects this particular checkpoint and override rule. It does not evaluate a verifier trained specifically on first-stage mistakes, full pages, or an independent attack source.
+
+**Next model experiment:** Seed 42 alone caught 83/90 public attacks at the start, 57/90 in the middle and 81/90 at the end of the excerpt. This post-hoc slice motivates a pooling experiment; it does not identify the cause of the misses. Compare the current first-token head with one that also learns a weighted average of the non-padding contextual token vectors. Both can use the existing document labels, including quoted benign examples; no token-by-token annotation is required. Keep the initializer, train/development data, update budget and seeds matched. Select thresholds on development data under the same 10% false-alarm constraint; report recall by insertion position, false alarms on benign descriptions and useful task completion. Use a fresh source-held-out set for any improvement claim. [Attention pooling](https://proceedings.mlr.press/v80/ilse18a.html) is a precedent for the aggregation method, not evidence that it will improve PromptShield.
+
+## Independent data review
+
+Freeze the completed wording-consistency milestone. The existing 60-case BIPIA-derived starter is ready for human review; it is a train/development calibration sample, not an independent test, because BIPIA source exposure exists in the baseline corpus. A local review guide and [generalization review protocol](docs/generalization-review-protocol.md) now define annotation, source-overlap, and held-out challenge requirements.
+
+The official LLMail-Inject release is a plausible external attack source, but only five rows were inspected to verify its schema. It contains participant attack submissions and benchmark outcomes, not matched benign examples or standalone trusted user requests in each row. No LLMail examples were downloaded, staged, overlap-screened, or used for training/evaluation. A future sample must join official scenario task definitions, group by participant and attack family, undergo overlap screening and human review, and be paired with separately reviewed benign emails. It can support an email-specific external test, not broad cross-task generalization by itself.
+
+The 60-case review can proceed alongside the model experiment. Audit label disagreements, then build and seal a separate challenge with independent benign controls before comparing frozen models.

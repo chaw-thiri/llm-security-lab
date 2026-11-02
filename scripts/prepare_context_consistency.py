@@ -81,10 +81,10 @@ def main():
     if DATA.exists():
         raise FileExistsError("Consistency data already frozen; choose a new study version")
     tokenizer = AutoTokenizer.from_pretrained("data/raw/piguard/backbone", local_files_only=True)
-    old = read_json("docs/real-document-source-manifest.json")
-    prior = read_json("docs/grounded-upgrade-data.json")
+    old = read_json("docs/records/real-document-source-manifest.json")
+    prior = read_json("docs/records/grounded-upgrade-data.json")
     records = {r["id"]: dict(r, raw_dir="data/raw/real-documents-v1") for r in old["sources"]}
-    previous_specs = read_json("configs/grounded-upgrade-sources.json")
+    previous_specs = read_json("configs/grounded-upgrade/sources.json")
     previous_meta = {r["id"]: r for r in prior["fresh_sources"]}
     for spec in previous_specs:
         records[spec["id"]] = dict(spec, **{k: v for k, v in previous_meta[spec["id"]].items() if k not in spec},
@@ -110,7 +110,7 @@ def main():
                     continue
                 passages_seen[key] = split
                 contexts[split][record["cohort"]].append(dict(document=passage, source_id=source, cohort=record["cohort"]))
-    specs = read_json("configs/context-consistency-sources.json")
+    specs = read_json("configs/context-consistency/sources.json")
     if len(specs) != 18 or sorted(Counter(s["cohort"] for s in specs).values()) != [6, 6, 6]:
         raise ValueError("Final source plan must contain six new pages per cohort")
     if {r["url"] for r in records.values()} & {r["url"] for r in specs}:
@@ -188,14 +188,14 @@ def main():
         write_jsonl(path, rows)
         manifest["splits"][split] = dict(rows=len(rows), labels=dict(Counter(str(r["label"]) for r in rows)), sha256=sha256(path))
     write_json(DATA/"manifest.json", manifest)
-    write_json("docs/context-consistency-data.json", manifest)
+    write_json("docs/records/context-consistency-data.json", manifest)
     for arm, weight in (("ce", 0.), ("consistent", .05)):
         for seed in (42, 43, 44):
             config = read_json("configs/full.json")
             config.update(data_dir=str(DATA), run_dir=f"runs/context-consistency-{arm}-{seed}", seed=seed, epochs=2,
                           encoder_lr=5e-6, head_lr=5e-6, max_fpr=.05, consistency_batches=True, consistency_weight=weight,
                           input_format="document", initial_checkpoint=INITIAL, initial_weights_sha256=INITIAL_SHA)
-            write_json(f"configs/context-consistency-{arm}-{seed}.json", config)
+            write_json(f"configs/context-consistency/{arm}-{seed}.json", config)
     audit = [dict(id=r["id"], prompt=r["prompt"], construction_label=r["label"], human_reviewed=False,
                   domain=r["domain"], role_family=r["role_family"], review_status="assistant semantic inspection pending")
              for r in training if r.get("context_group")][:24]

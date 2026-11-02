@@ -2,10 +2,12 @@
 from pathlib import Path
 import sys
 import unittest
+from unittest.mock import Mock
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"scripts"))
 from prepare_real_documents import MainText
 from validate_real_documents import qa_success, answer_form, wilson, summarize
+from replay_task_verifier import route, summarize as summarize_replay
 
 
 class RealDocumentTests(unittest.TestCase):
@@ -45,6 +47,27 @@ class RealDocumentTests(unittest.TestCase):
         self.assertEqual(report["attacked_source_count"],1)
         self.assertEqual(report["sources_with_any_exact_hijack"],1)
         self.assertEqual(report["attack_recall"],.5)
+
+    def test_verifier_cannot_reopen_a_length_rejection(self):
+        case = {"task": "extract", "document": "complete document"}
+        first, second = Mock(), Mock()
+        first.score.return_value = {"blocked": True, "truncated": True, "injection_score": .9}
+        self.assertEqual(route(case, first, second)["confirmed"], "length")
+        second.score.assert_not_called()
+        first.score.return_value["truncated"] = False
+        second.score.return_value = {"blocked": False, "truncated": True, "injection_score": .1}
+        self.assertEqual(route(case, first, second)["confirmed"], "length")
+        second.score.assert_called_once_with(case["document"], task=case["task"])
+
+    def test_releasing_a_benign_input_only_recovers_utility_if_llama_answered_correctly(self):
+        rows = [
+            {"label": 0, "confirmed": "allow", "correct": correct, "hijacked": False}
+            for correct in (False, True)
+        ] + [{"label": 1, "confirmed": "allow", "correct": False, "hijacked": False},
+             {"label": 1, "confirmed": "length", "correct": False, "hijacked": True}]
+        result = summarize_replay(rows, "confirmed")
+        self.assertEqual((result["false_alarms"], result["correct_benign_answers"]), (0, 1))
+        self.assertEqual((result["attacks_detected"], result["attack_length_rejections"], result["exact_hijacks"]), (0, 1, 0))
 
 
 if __name__ == "__main__":

@@ -168,7 +168,7 @@ def prepare():
                           epochs=2, encoder_lr=5e-6, head_lr=5e-6, max_fpr=0.02,
                           paired_batches=True, input_format=mode, initial_checkpoint=INITIAL,
                           initial_weights_sha256=INITIAL_SHA)
-            write_json(f"configs/task-aware-{arm}-{seed}.json", config)
+            write_json(f"configs/task-aware/{arm}-{seed}.json", config)
         print(arm, manifest["splits"], flush=True)
 
     app_path = ROOT / "application-challenge.jsonl"
@@ -192,7 +192,7 @@ def prepare():
                              "Only eight attack and eight benign application pairs per challenge family are replayed.",
                              "This tests task conditioning on short text, not deployment-scale documents or adaptive attacks."],
               "hashes": {p.name: sha256(p) for p in [app_path]}}
-    write_json("docs/task-aware-study.json", report)
+    write_json("docs/records/task-aware-study.json", report)
 
 
 if __name__ == "__main__":

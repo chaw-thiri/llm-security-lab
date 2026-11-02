@@ -67,7 +67,7 @@ def evaluate(checkpoint, rows):
 
 
 def main():
-    study = read_json("docs/task-aware-study.json")
+    study = read_json("docs/records/task-aware-study.json")
     model_paths = {"baseline": "runs/baseline-v1/models/full/best",
                    "context-v2-ce-42": "runs/context-v2-ce-42/best"}
     for seed in (42, 43, 44):
@@ -129,7 +129,7 @@ def main():
         report["models"][name] = result
         write_json(ROOT / "classification-comparison.json", report)
         print(name, "challenge", result["metrics"], "NotInject FPR", ni["metrics"]["benign_fpr"], flush=True)
-    write_json("docs/task-aware-results.json", report)
+    write_json("docs/records/task-aware-results.json", report)
     print("TASK-AWARE CLASSIFICATION EVALUATION COMPLETE", flush=True)
 
 

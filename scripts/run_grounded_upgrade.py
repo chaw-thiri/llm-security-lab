@@ -77,7 +77,7 @@ def train_arm(arm,seed,development):
     path=Path(f"runs/grounded-upgrade-{arm}-{seed}")
     status=path/"status.json"
     if not status.exists() or read_json(status)["status"]!="complete":
-        command=[sys.executable,"-m","promptshield.train","--config",f"configs/grounded-upgrade-{arm}-{seed}.json"]
+        command=[sys.executable,"-m","promptshield.train","--config",f"configs/grounded-upgrade/{arm}-{seed}.json"]
         if (path/"config.json").exists():
             command.append("--resume")
         subprocess.run(command,check=True)
@@ -144,7 +144,7 @@ def evaluate(manifest,baseline,runs):
         report["models"][name]=result
         write_json(OUT/"classification-results.json",report)
         print(name,"FRESH",result["fresh"]["metrics"],flush=True)
-    write_json("docs/grounded-upgrade-results.json",report)
+    write_json("docs/records/grounded-upgrade-results.json",report)
     write_compact_report("grounded-upgrade")
     write_json(OUT/"status.json",{"status":"complete","models":list(report["models"]),"default_checkpoint_changed":False})
 

@@ -20,4 +20,4 @@ Retain this set as an inspected false-alarm regression benchmark; do not tune on
 
 All cases are benign trigger-word probes. Attack recall, complete-document utility and production prevalence are unmeasured; exact-match screening does not exclude semantic overlap.
 
-**Records:** [Measured record](notinject-evaluation.json). Detailed rationale and chronology: [research diary](../research_diary.md).
+**Records:** [Measured record](../records/notinject-evaluation.json). Detailed rationale and chronology: [research diary](../../research_diary.md).

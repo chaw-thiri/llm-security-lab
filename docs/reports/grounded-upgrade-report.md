@@ -21,4 +21,4 @@ Do not promote. Investigate score offsets and within-domain separation rather th
 
 Final evidence has 18 new same-publisher pages, 72 benign cases and 432 authored attacks. Labels are construction-based. Older public-document application replay is exposed regression, not fresh utility evidence. The final pages later became development material for the consistency study.
 
-**Records:** [Measured record](grounded-upgrade-results.json). [Frozen protocol](provenance/frozen-protocols.json), key `docs/grounded-upgrade-protocol.md`. [Data/source lineage](grounded-upgrade-data.json). Detailed rationale and chronology: [research diary](../research_diary.md).
+**Records:** [Measured record](../records/grounded-upgrade-results.json). [Frozen protocol](../provenance/frozen-protocols.json), key `docs/grounded-upgrade-protocol.md`. [Data/source lineage](../records/grounded-upgrade-data.json). Detailed rationale and chronology: [research diary](../../research_diary.md).

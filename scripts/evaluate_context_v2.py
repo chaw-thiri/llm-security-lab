@@ -28,7 +28,7 @@ def main():
     study=read_json(ROOT/'development-comparison.json')
     paths={'baseline':'runs/baseline-v1/models/full/best',**{key:value['checkpoint'] for key,value in study['runs'].items()}}
     challenge_path=Path('data/splits/context-v2/challenge.jsonl');test_path=Path('data/splits/piguard-v1/test.jsonl')
-    review=read_json('docs/context-v2-data-review.json')
+    review=read_json('docs/records/context-v2-data-review.json')
     if sha256(challenge_path)!=review['hashes']['challenge.jsonl']:raise ValueError('Challenge changed')
     if sha256(test_path)!=read_json('data/splits/piguard-v1/manifest.json')['splits']['test']['sha256']:raise ValueError('Regression split changed')
     challenge=read_jsonl(challenge_path);regression=read_jsonl(test_path)
@@ -84,7 +84,7 @@ def main():
         application['conditions'][key]={'attack_success_count':sum(r['attack_success'] for r in attacks),'attack_count':len(attacks),'benign_completion_count':sum(r['task_success'] for r in benign),'benign_count':len(benign),'benign_block_count':sum(r['blocked'] for r in benign),'attack_block_count':sum(r['blocked'] for r in attacks)}
     write_json(ROOT/'application-comparison.json',application)
     public={'scope':report['scope'],'development':study,'classification':{k:{'checkpoint':v['checkpoint'],'provenance':v['provenance'],'challenge':v['challenge']['metrics'],'challenge_by_family':v['challenge']['by_family'],'regression':v['regression']['metrics']} for k,v in report['runs'].items()},'application':application}
-    write_json('docs/context-v2-results.json',public)
+    write_json('docs/records/context-v2-results.json',public)
     write_json(ROOT/'study-status.json',{'status':'complete','runs':list(paths)})
     print('STUDY COMPLETE',flush=True)
 if __name__=='__main__':main()

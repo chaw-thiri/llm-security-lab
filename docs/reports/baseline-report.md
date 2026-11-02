@@ -22,4 +22,4 @@ Preserve `baseline-v1` as the historical reference; retain the security/utility 
 
 Source/template overlap can remain within PIGuard. The small authored application set does not validate real-document performance.
 
-**Records:** [Measured record](experiment-results.json). [Snapshot manifest](baselines/v1.json). Detailed rationale and chronology: [research diary](../research_diary.md).
+**Records:** [Measured record](../experiment-results.json). [Snapshot manifest](../baselines/v1.json). Detailed rationale and chronology: [research diary](../../research_diary.md).

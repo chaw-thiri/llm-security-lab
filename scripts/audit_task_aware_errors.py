@@ -7,7 +7,7 @@ from promptshield.common import read_json, read_jsonl, write_json, write_jsonl, 
 
 def main():
     rows_path = Path("data/splits/task-aware-v1/task-document/test.jsonl")
-    scores_path = Path("docs/task-aware-results.json")
+    scores_path = Path("docs/records/task-aware-results.json")
     report = read_json(scores_path)
     if sha256(rows_path) != report["challenge_sha256"]["task-document"]:
         raise ValueError("Challenge hash changed")
@@ -40,7 +40,7 @@ def main():
                              "unique_task_phrasings": len({r["task"] for r in cases.values()}),
                              "semantic_task_types": ["appointment reference extraction"]}
     write_jsonl("results/task-aware-v1/error-cases.jsonl", errors)
-    write_json("docs/task-aware-error-audit.json", output)
+    write_json("docs/records/task-aware-error-audit.json", output)
     write_compact_report("task-aware")
     print(json_summary(output))
 

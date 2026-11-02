@@ -21,4 +21,4 @@ Reject task conditioning as an upgrade in this study. The audit identified missi
 
 The data are authored and correlated; quotation is a post-hoc stress test. Replay reuses generation and includes only 32 attacks per seed.
 
-**Records:** [Measured record](task-aware-results.json). [Frozen protocol](provenance/frozen-protocols.json), key `docs/task-aware-protocol.md`. [Application record](task-aware-application-results.json) · [error audit](task-aware-error-audit.json). Detailed rationale and chronology: [research diary](../research_diary.md).
+**Records:** [Measured record](../records/task-aware-results.json). [Frozen protocol](../provenance/frozen-protocols.json), key `docs/task-aware-protocol.md`. [Application record](../records/task-aware-application-results.json) · [error audit](../records/task-aware-error-audit.json). Detailed rationale and chronology: [research diary](../../research_diary.md).

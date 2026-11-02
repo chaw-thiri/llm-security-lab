@@ -180,10 +180,10 @@ def main():
     if sha256(Path(INITIAL)/"model.safetensors") != INITIAL_SHA:
         raise ValueError("Initializer changed")
     tok = AutoTokenizer.from_pretrained("data/raw/piguard/backbone", local_files_only=True)
-    prior = read_json("docs/context-consistency-data.json")
+    prior = read_json("docs/records/context-consistency-data.json")
     records = {r["id"]:r for r in prior["inspected_sources"]}
     last_meta = {r["id"]:r for r in prior["final_sources"]}
-    last_specs = read_json("configs/context-consistency-sources.json")
+    last_specs = read_json("configs/context-consistency/sources.json")
     for s in last_specs:
         records[s["id"]] = dict(s, **{k:v for k,v in last_meta[s["id"]].items() if k not in s}, raw_dir="data/raw/context-consistency-v1")
     partition = dict(prior["source_partition"])
@@ -283,16 +283,16 @@ def main():
         exposure="All 66 older public sources and earlier challenges are inspected material; PIGuard original test is regression only",
         label_review="Assistant semantic audit, construction labels; independent human review remains incomplete. Reserved external challenge unused",
         limitations=["Variants within 18 pages are correlated; seeds share a pretrained/continued initialization", "New publishers do not establish absence from pretraining", "Only short constructed answer-hijack cases; no production or application success claim"])
-    write_json("docs/wording-final-protocol.json",protocol)
-    write_json("configs/wording-final-sources.json",specs)
-    manifest = dict(status="frozen_before_training",splits={},protocol_sha256=sha256("docs/wording-final-protocol.json"),
-        source_plan_sha256=sha256("configs/wording-final-sources.json"), source_partition=partition,inspected_sources=list(records.values()),
+    write_json("docs/records/wording-final-protocol.json",protocol)
+    write_json("configs/wording-final/sources.json",specs)
+    manifest = dict(status="frozen_before_training",splits={},protocol_sha256=sha256("docs/records/wording-final-protocol.json"),
+        source_plan_sha256=sha256("configs/wording-final/sources.json"), source_partition=partition,inspected_sources=list(records.values()),
         final_sources=acquired,removed_duplicate_passages=removed,styles=STYLES,payloads=PAYLOADS,human_reviewed=False,
         reserved_external_challenge_used=False,initial_weights_sha256=INITIAL_SHA)
     for s, rows in splits.items():
         path = DATA/f"{s}.jsonl"; write_jsonl(path,rows)
         manifest["splits"][s] = dict(rows=len(rows),labels=dict(Counter(str(r["label"]) for r in rows)),sha256=sha256(path))
-    write_json(DATA/"manifest.json",manifest); write_json("docs/wording-final-data.json",manifest)
+    write_json(DATA/"manifest.json",manifest); write_json("docs/records/wording-final-data.json",manifest)
     write_json(OUT/"source-preview.json",previews)
     audit = []
     for split,rows in splits.items():
@@ -308,7 +308,7 @@ def main():
             cfg.update(data_dir=str(DATA),run_dir=f"runs/wording-final-{arm}-{seed}",seed=seed,epochs=2,batch_size=8,
                 accumulation_steps=2,encoder_lr=5e-6,head_lr=5e-6,max_fpr=.1,wording_batches=True,
                 consistency_axes=axes,consistency_weight=.05,input_format="document",initial_checkpoint=INITIAL,initial_weights_sha256=INITIAL_SHA)
-            write_json(f"configs/wording-final-{arm}-{seed}.json",cfg)
+            write_json(f"configs/wording-final/{arm}-{seed}.json",cfg)
     print(json.dumps(dict(splits=manifest["splits"],source_counts=dict(Counter(partition.values())),audit_rows=len(audit)),indent=2),flush=True)
 
 

@@ -63,7 +63,7 @@ def add_missing_ce(study):
     if sha256(path) != study["challenge_sha256"]["document"]:
         raise ValueError("Previously inspected challenge changed")
     old_rows = read_jsonl(path)
-    ni = read_json("docs/notinject-evaluation.json")
+    ni = read_json("docs/records/notinject-evaluation.json")
     for seed in (43, 44):
         checkpoint = Path(f"runs/context-v2-ce-{seed}/best")
         provenance = {"weights": sha256(checkpoint/"model.safetensors"),
@@ -128,7 +128,7 @@ def analyze(entry, condition):
 
 
 def main():
-    study = read_json("docs/task-aware-results.json")
+    study = read_json("docs/records/task-aware-results.json")
     add_missing_ce(study)
     names = ["baseline"] + [f"{method}-{seed}" for method in ("context-v2-ce", "document", "task-document") for seed in (42, 43, 44)]
     results, rows_by_model = {}, {}
@@ -163,7 +163,7 @@ def main():
                     member_sets[policy+"_false_positives"].append({r["id"] for r in rows if not r["label"] and r["score"] >= threshold})
             common[condition][group] = {key: sorted(set.intersection(*sets)) for key, sets in member_sets.items()}
     report = {"scope": "Exploratory oracle frontiers on previously inspected examples. Thresholds chosen from these sets are optimistic descriptive limits, NOT independently validated settings or deployment recommendations.",
-              "inputs": {"scores_sha256": sha256("docs/task-aware-results.json"), "notinject_sha256": sha256("docs/notinject-evaluation.json"), "challenge_sha256": study["challenge_sha256"]},
+              "inputs": {"scores_sha256": sha256("docs/records/task-aware-results.json"), "notinject_sha256": sha256("docs/records/notinject-evaluation.json"), "challenge_sha256": study["challenge_sha256"]},
               "population": {"synthetic_attacks":256, "synthetic_benign":256, "notinject_benign":291,
                              "note":"Original and quoted conditions reuse the same cases; they are not independent replications. Pooled mixture is artificial; main comparisons bound FPR separately on each benign source."},
               "models": results, "common_errors": common}
@@ -173,7 +173,7 @@ def main():
     compact["models"] = {name: {**model, "conditions": {
         condition: {key: value for key, value in data.items() if key not in ("curve", "synthetic_curve")}
         for condition, data in model["conditions"].items()}} for name, model in results.items()}
-    write_json("docs/detector-diagnostic.json", compact)
+    write_json("docs/records/detector-diagnostic.json", compact)
     write_report(report)
     plot(report)
 
@@ -187,7 +187,7 @@ def export_common_errors(common):
     cases = {"synthetic:"+r["id"]: {"task": r["task"], "document": r["document"],
               "family": r["family"], "source": "synthetic", "label": r["label"]}
              for r in read_jsonl("data/splits/task-aware-v1/task-document/test.jsonl")}
-    source = read_json("docs/notinject-evaluation.json")
+    source = read_json("docs/records/notinject-evaluation.json")
     for subset in ("one", "two", "three"):
         filename = f"data/NotInject_{subset}-00000-of-00001.parquet"
         path = Path("data/raw/external/notinject")/filename
@@ -236,9 +236,9 @@ def plot(report):
     axes[0].set_ylabel("Attacks detected (%)")
     axes[2].legend(fontsize=8,loc="lower right")
     fig.suptitle("Exploratory limits on inspected cases — means and seed ranges")
-    fig.savefig("docs/detector-diagnostic.png",dpi=180)
-    fig.savefig("docs/detector-diagnostic.svg")
-    svg = Path("docs/detector-diagnostic.svg")
+    fig.savefig("docs/figures/detector-diagnostic.png",dpi=180)
+    fig.savefig("docs/figures/detector-diagnostic.svg")
+    svg = Path("docs/figures/detector-diagnostic.svg")
     svg.write_text("\n".join(line.rstrip() for line in svg.read_text().splitlines()) + "\n")
     plt.close(fig)
 

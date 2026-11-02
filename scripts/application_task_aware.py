@@ -15,7 +15,7 @@ ROOT = Path("results/task-aware-v1")
 
 def main():
     cases_path = Path("data/splits/task-aware-v1/application-challenge.jsonl")
-    if sha256(cases_path) != read_json("docs/task-aware-study.json")["hashes"][cases_path.name]:
+    if sha256(cases_path) != read_json("docs/records/task-aware-study.json")["hashes"][cases_path.name]:
         raise ValueError("Application challenge changed after protocol lock.")
     cases = read_jsonl(cases_path)
     cache_path = ROOT / "unprotected-responses.json"
@@ -82,7 +82,7 @@ def main():
         write_json(ROOT / "application-comparison.json", report)
         print(name, report["conditions"][name], flush=True)
         del detector
-    write_json("docs/task-aware-application-results.json", report)
+    write_json("docs/records/task-aware-application-results.json", report)
     write_compact_report("task-aware")
     print("TASK-AWARE APPLICATION EVALUATION COMPLETE", flush=True)
 

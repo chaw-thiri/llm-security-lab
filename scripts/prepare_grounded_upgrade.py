@@ -114,7 +114,7 @@ def original(rows,n,seed):
 def main():
     if ROOT.exists():
         raise FileExistsError(ROOT)
-    source_manifest=read_json("docs/real-document-source-manifest.json")
+    source_manifest=read_json("docs/records/real-document-source-manifest.json")
     tokenizer=AutoTokenizer.from_pretrained("data/raw/piguard/backbone",local_files_only=True)
     cohorts=("technical","security","general")
     partition,contexts={},{"train":[],"validation":[],"regression":[]}
@@ -127,7 +127,7 @@ def main():
                 raise ValueError("Inspected source snapshot changed")
             partition[spec["id"]]=split
             contexts[split] += [dict(source_id=spec["id"],cohort=cohort,document=w) for w in windows(path.read_text().strip(),tokenizer)]
-    specs=read_json("configs/grounded-upgrade-sources.json")
+    specs=read_json("configs/grounded-upgrade/sources.json")
     old_raw=public.RAW
     public.RAW=FRESH
     try:
@@ -211,10 +211,10 @@ def main():
             config.update(data_dir=str(folder),run_dir=f"runs/grounded-upgrade-{arm}-{seed}",seed=seed,epochs=2,
                           encoder_lr=5e-6,head_lr=5e-6,max_fpr=.05,paired_batches=True,input_format="document",
                           initial_checkpoint=INITIAL,initial_weights_sha256=INITIAL_SHA)
-            write_json(f"configs/grounded-upgrade-{arm}-{seed}.json",config)
+            write_json(f"configs/grounded-upgrade/{arm}-{seed}.json",config)
     manifest={"status":"frozen_before_training", "initial_weights_sha256":INITIAL_SHA,
               "protocol_sha256":frozen_protocol_sha256("docs/grounded-upgrade-protocol.md"),"source_partition":partition,
-              "fresh_source_plan_sha256":sha256("configs/grounded-upgrade-sources.json"),"fresh_sources":acquired,
+              "fresh_source_plan_sha256":sha256("configs/grounded-upgrade/sources.json"),"fresh_sources":acquired,
               "counts":{"rows_per_arm":4096,"original_replay":1536,"real_context_pairs":1280,
                         "development_rows":1024,"fresh_rows":len(fresh),"fresh_sources":len(specs)},
               "human_review_status":"Construction labels only; separate human-review corpus remains pending and unused",
@@ -222,7 +222,7 @@ def main():
               "source_exposure_note":"Old 30-page validation is now a regression set with declared training/development exposure. Fresh pages use same publishers but distinct URLs.",
               "hashes":{"development.jsonl":sha256(ROOT/"development.jsonl"),"fresh-challenge.jsonl":sha256(ROOT/"fresh-challenge.jsonl")}}
     write_json(ROOT/"manifest.json",manifest)
-    write_json("docs/grounded-upgrade-data.json",manifest)
+    write_json("docs/records/grounded-upgrade-data.json",manifest)
     print(json.dumps({"counts":manifest["counts"],"source_partition":partition},indent=2),flush=True)
 
 

@@ -30,7 +30,7 @@ def unpack(row, kind):
 def main():
     if ROOT.exists():
         raise FileExistsError(f"Refusing to overwrite {ROOT}")
-    source = read_json("docs/bipia-source.json")
+    source = read_json("docs/records/bipia-source.json")
     for name, record in source["files"].items():
         if sha256(RAW / name) != record["sha256"]:
             raise ValueError(f"Changed upstream asset: {name}")
@@ -162,7 +162,7 @@ def main():
                                 "No challenge text or model scores inspected to choose partitions.",
                                 "Third-party context rights and attribution remain as recorded in upstream NOTICE.md."]}
     write_json(ROOT / "manifest.json", manifest)
-    write_json("docs/external-tasks-v2-manifest.json", manifest)
+    write_json("docs/records/external-tasks-v2-manifest.json", manifest)
     print(json.dumps(manifest, indent=2))
 
 
