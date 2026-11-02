@@ -8,15 +8,34 @@ from transformers import AutoTokenizer, DistilBertConfig, DistilBertModel
 from promptshield.common import read_json, write_json
 
 
+class ResidualAttentionPool(nn.Module):
+    """Add a learned summary of non-padding states to the final first-token state."""
+
+    def __init__(self, width):
+        super().__init__()
+        # No extra RNG draws: the paired runs have the same initial logits and dropout stream.
+        self.query = nn.Parameter(torch.zeros(width))
+        self.projection = nn.Parameter(torch.zeros(width, width))
+
+    def forward(self, hidden, attention_mask):
+        valid = attention_mask.bool()
+        logits = hidden @ self.query
+        weights = logits.masked_fill(~valid, torch.finfo(logits.dtype).min).softmax(dim=1)
+        weights = weights.masked_fill(~valid, 0)
+        summary = torch.bmm(weights.unsqueeze(1), hidden).squeeze(1)
+        return hidden[:, 0] + nn.functional.linear(summary, self.projection)
+
+
 class InjectionClassifier(nn.Module):
     def __init__(self, encoder, pooling="cls", dropout=0.2, frozen=False):
         super().__init__()
-        if pooling not in ("cls", "mean"):
-            raise ValueError("pooling must be cls or mean")
+        if pooling not in ("cls", "mean", "cls_attention"):
+            raise ValueError("pooling must be cls, mean or cls_attention")
         self.encoder = encoder
         self.pooling, self.dropout, self.frozen = pooling, dropout, frozen
         width = encoder.config.dim
         self.head = nn.Sequential(nn.Linear(width, width), nn.ReLU(), nn.Dropout(dropout), nn.Linear(width, 2))
+        self.attention_pool = ResidualAttentionPool(width) if pooling == "cls_attention" else None
         if frozen:
             self.encoder.requires_grad_(False)
             self.encoder.eval()
@@ -31,10 +50,25 @@ class InjectionClassifier(nn.Module):
         hidden = self.encoder(input_ids=input_ids, attention_mask=attention_mask).last_hidden_state
         if self.pooling == "cls":
             pooled = hidden[:, 0]
+        elif self.attention_pool is not None:
+            pooled = self.attention_pool(hidden, attention_mask)
         else:
             mask = attention_mask.unsqueeze(-1).to(hidden.dtype)
             pooled = (hidden * mask).sum(1) / mask.sum(1).clamp(min=1)
         return self.head(pooled)
+
+    def initialize_from(self, source):
+        """Copy shared weights strictly; a new attention branch starts at zero."""
+        if self.pooling == source.pooling:
+            self.load_state_dict(source.state_dict(), strict=True)
+        elif self.pooling == "cls_attention" and source.pooling == "cls":
+            self.encoder.load_state_dict(source.encoder.state_dict(), strict=True)
+            self.head.load_state_dict(source.head.state_dict(), strict=True)
+            with torch.no_grad():
+                self.attention_pool.query.zero_()
+                self.attention_pool.projection.zero_()
+        else:
+            raise ValueError(f"Unsupported continuation from {source.pooling} to {self.pooling}")
 
     @classmethod
     def from_backbone(cls, path, **kwargs):

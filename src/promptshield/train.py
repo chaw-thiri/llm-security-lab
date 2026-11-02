@@ -67,7 +67,10 @@ def load_config(path):
 
 def optimizer_for(model, config):
     groups = []
-    for name, module, lr in (("encoder", model.encoder, config["encoder_lr"]), ("head", model.head, config["head_lr"])):
+    modules = [("encoder", model.encoder, config["encoder_lr"]), ("head", model.head, config["head_lr"])]
+    if model.attention_pool is not None:
+        modules.append(("attention_pool", model.attention_pool, config["head_lr"]))
+    for name, module, lr in modules:
         decay, no_decay = [], []
         for param_name, param in module.named_parameters():
             if param.requires_grad:
@@ -201,13 +204,12 @@ def train(config_path, resume=False, limit_train=None, limit_validation=None, ma
         if sha256(initial / "model.safetensors") != config.get("initial_weights_sha256"):
             raise ValueError("Initial checkpoint hash differs from declared experiment provenance.")
         loaded, initial_tokenizer, initial_metadata = InjectionClassifier.load(initial, device)
-        if (initial_metadata["pooling"] != config["pooling"] or
-                initial_metadata["frozen"] != config["frozen"] or
+        if (initial_metadata["frozen"] != config["frozen"] or
                 initial_metadata["dropout"] != config["dropout"] or
                 initial_metadata["max_length"] != config["max_length"] or
                 initial_tokenizer.get_vocab() != tokenizer.get_vocab()):
             raise ValueError("Continuation architecture/tokenizer differs from the initial checkpoint.")
-        model.load_state_dict(loaded.state_dict())
+        model.initialize_from(loaded)
         del loaded, initial_tokenizer
     if benchmark_steps:
         return benchmark(model, dataset, tokenizer, device, config, run / "benchmark.json", benchmark_steps)

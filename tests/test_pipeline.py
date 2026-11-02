@@ -70,6 +70,31 @@ class MetricTests(unittest.TestCase):
 
 
 class ModelTests(unittest.TestCase):
+    def test_residual_attention_starts_identical_then_learns_token_weights(self):
+        torch.manual_seed(17)
+        control, attention = tiny_model().eval(), tiny_model(pooling="cls_attention").eval()
+        attention.initialize_from(control)
+        with self.assertRaises(ValueError):
+            attention.initialize_from(tiny_model(pooling="mean"))
+        ids = torch.tensor([[2, 5, 3], [2, 9, 3]])
+        mask = torch.ones_like(ids)
+        with torch.no_grad():
+            torch.testing.assert_close(attention(ids, mask), control(ids, mask), rtol=0, atol=0)
+        opt = optimizer_for(attention, {"head_lr": .01, "encoder_lr": .001, "weight_decay": .01})
+        extra = attention.attention_pool
+        for step in range(2):
+            opt.zero_grad(set_to_none=True)
+            torch.nn.functional.cross_entropy(attention(ids, mask), torch.tensor([0, 1])).backward()
+            self.assertGreater(extra.projection.grad.norm().item(), 0)
+            if step == 1:
+                self.assertGreater(extra.query.grad.norm().item(), 0)
+            opt.step()
+        self.assertGreater(extra.query.norm().item(), 0)
+        padded = torch.nn.functional.pad(ids, (0, 3))
+        padded_mask = torch.nn.functional.pad(mask, (0, 3))
+        with torch.no_grad():
+            torch.testing.assert_close(attention(ids, mask), attention(padded, padded_mask), rtol=1e-5, atol=1e-6)
+
     def test_encoder_and_head_receive_gradients(self):
         model = tiny_model()
         logits = model(torch.tensor([[2, 5, 3], [2, 7, 3]]), torch.ones((2, 3), dtype=torch.long))
@@ -98,16 +123,22 @@ class ModelTests(unittest.TestCase):
         torch.testing.assert_close(a, b, atol=1e-6, rtol=1e-5)
 
     def test_safe_checkpoint_roundtrip_offline(self):
-        model = tiny_model().eval()
         tokenizer = PreTrainedTokenizerFast(tokenizer_object=Tokenizer(WordPiece(
             {"[PAD]": 0, "[UNK]": 1, "[CLS]": 2, "[SEP]": 3, "a": 4}, unk_token="[UNK]")),
             unk_token="[UNK]", pad_token="[PAD]", cls_token="[CLS]", sep_token="[SEP]")
         ids, mask = torch.tensor([[2, 4, 3]]), torch.ones((1, 3), dtype=torch.long)
-        with tempfile.TemporaryDirectory() as directory:
-            model.save(directory, tokenizer, {"threshold": 0.6, "max_length": 32, "diagnostic_run": True})
-            loaded, _, metadata = InjectionClassifier.load(directory)
-            with torch.no_grad(): torch.testing.assert_close(model(ids, mask), loaded(ids, mask))
-            self.assertEqual(metadata["threshold"], 0.6)
+        for pooling in ("cls", "cls_attention"):
+            model = tiny_model(pooling=pooling).eval()
+            if model.attention_pool is not None:
+                with torch.no_grad():
+                    model.attention_pool.projection.normal_()
+                    model.attention_pool.query.normal_()
+            with self.subTest(pooling=pooling), tempfile.TemporaryDirectory() as directory:
+                model.save(directory, tokenizer, {"threshold": 0.6, "max_length": 32, "diagnostic_run": True})
+                loaded, _, metadata = InjectionClassifier.load(directory)
+                with torch.no_grad(): torch.testing.assert_close(model(ids, mask), loaded(ids, mask))
+                self.assertEqual(metadata["threshold"], 0.6)
+                self.assertEqual(loaded.pooling, pooling)
 
     def test_inference_special_tokens_truncation_and_overflow_windows(self):
         from tokenizers.pre_tokenizers import Whitespace
