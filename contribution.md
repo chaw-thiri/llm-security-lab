@@ -21,11 +21,12 @@ Match initialization, examples, batches and update budgets for controlled loss c
 ## Validation and review
 
 ```bash
-python -m unittest discover -s tests -p 'test_*.py'
-python scripts/verify_baseline.py
-python scripts/render_reports.py --check
+PYTHONPATH=src python3 scripts/render_reports.py --check
+HF_HUB_OFFLINE=1 PYTHONPATH=src python3 -m unittest discover -s tests -p 'test_*.py'
 git diff --check
 ```
+
+The [CI workflow](.github/workflows/offline-checks.yml) checks reports before installing ML dependencies, then runs the unit suite on CPU. Neither check needs a downloaded research dataset, a trained checkpoint or Ollama. Separately, after restoring the local baseline snapshot, run `python scripts/verify_baseline.py` to verify its files against the committed hashes.
 
 Add behavioral checks for changed training, scoring, serialization or serving logic. Loss changes need gradient-direction and accumulation checks; resumable training needs an interrupted-versus-uninterrupted comparison. Documentation changes need link, metric and provenance checks rather than model retraining.
 
